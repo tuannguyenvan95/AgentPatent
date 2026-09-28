@@ -62,10 +62,17 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Left Zone: Brand & Identity (Aligned with Docket Sidebar) */}
           <div className="flex items-center space-x-3 min-w-[240px] xl:min-w-[280px]">
-            <div className="h-10 w-10 rounded-xl bg-[#0A0E17] border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.25)] relative group flex-shrink-0">
-              <Cpu className="h-5 w-5 text-cyan-400 group-hover:scale-105 transition-transform" />
-              <div className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-teal-400 animate-ping" />
-              <div className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-teal-400" />
+            {/* Cyber Forensic Logo with Rotating Orbit Light Beam */}
+            <div className="relative h-10 w-10 rounded-xl p-[1.5px] overflow-hidden flex items-center justify-center group flex-shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+              {/* Rotating glowing laser beam running around the logo border */}
+              <div
+                className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_280deg,#06B6D4_330deg,#14B8A6_360deg)] animate-spin"
+                style={{ animationDuration: '3.5s' }}
+              />
+              {/* Inner dark core */}
+              <div className="relative h-full w-full rounded-[10px] bg-[#0A0E17] flex items-center justify-center border border-cyan-500/30">
+                <Cpu className="h-5 w-5 text-cyan-400 group-hover:scale-110 group-hover:text-cyan-300 transition-all duration-300" />
+              </div>
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
