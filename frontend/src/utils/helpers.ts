@@ -189,7 +189,7 @@ export const PRESET_PRIOR_ART = [
   },
   {
     title: 'GenLayer Official Whitepaper - Subjective Consensus Protocols',
-    url: 'https://raw.githubusercontent.com/yeagerai/genlayer-simulator/develop/README.md',
+    url: 'https://docs.genlayer.com/full-documentation.txt',
     desc: 'Public foundational specification of decentralized non-deterministic LLM execution.'
   }
 ];
