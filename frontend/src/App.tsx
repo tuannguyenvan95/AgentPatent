@@ -32,7 +32,7 @@ export const App: React.FC = () => {
   // Web3 state
   const [contractAddress, setContractAddress] = useState<string>(getSavedContractAddress());
   const [userAddress, setUserAddress] = useState<string>('');
-  const [userBalance, setUserBalance] = useState<string>('0.00');
+  const [userBalance, setUserBalance] = useState<string>('0');
 
   // App data state
   const [patents, setPatents] = useState<PatentCaseData[]>([]);
@@ -84,7 +84,7 @@ export const App: React.FC = () => {
 
   const handleDisconnectWallet = () => {
     setUserAddress('');
-    setUserBalance('0.00');
+    setUserBalance('0');
     showToast('info', 'Operator session terminated');
   };
 

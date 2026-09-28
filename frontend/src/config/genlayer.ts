@@ -41,7 +41,7 @@ export function saveContractAddress(address: string) {
  * Fetch real on-chain GEN balance directly from Studionet RPC endpoint
  */
 export async function fetchStudionetBalance(address: string): Promise<string> {
-  if (!address) return '0.00';
+  if (!address) return '0';
 
   try {
     const res = await fetch(STUDIONET_RPC_URL, {
@@ -76,7 +76,7 @@ export async function fetchStudionetBalance(address: string): Promise<string> {
     }
   }
 
-  return '0.00';
+  return '0';
 }
 
 export interface PatentCaseData {

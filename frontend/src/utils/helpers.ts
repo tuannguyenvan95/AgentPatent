@@ -1,13 +1,21 @@
 export function formatGen(wei: string | bigint | number | undefined): string {
-  if (!wei) return '0.00';
+  if (!wei) return '0';
   try {
     const weiBig = typeof wei === 'bigint' ? wei : BigInt(wei.toString());
+    if (weiBig === 0n) return '0';
     const whole = weiBig / 10n ** 18n;
     const remainder = weiBig % 10n ** 18n;
-    const fraction = remainder.toString().padStart(18, '0').slice(0, 4);
+    if (remainder === 0n) {
+      return whole.toString();
+    }
+    let fraction = remainder.toString().padStart(18, '0').slice(0, 4);
+    fraction = fraction.replace(/0+$/, '');
+    if (!fraction) {
+      return whole.toString();
+    }
     return `${whole}.${fraction}`;
   } catch (e) {
-    return '0.00';
+    return '0';
   }
 }
 
