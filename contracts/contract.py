@@ -2,7 +2,6 @@
 from genlayer import *
 from dataclasses import dataclass
 import json
-import hashlib
 
 # Canonical GenVM transaction rollback error support
 if hasattr(gl, "vm") and hasattr(gl.vm, "UserError"):
@@ -92,8 +91,8 @@ class Contract(gl.Contract):
     Features: Multi-Role Permissions, Strict Escrow Preservation, 24-Block Cooling-Off Dispute Window,
               Anti-Prompt Injection Canary Verification, Admin Arbitration Escalation.
     """
-    patents: TreeMap[u64, PatentCase]
-    patent_ids: DynArray[u64]
+    patents: TreeMap[str, PatentCase]
+    patent_ids: DynArray[str]
     total_patent_locked: bigint
     total_disputes_resolved: u32
     patent_counter: u64
@@ -182,8 +181,9 @@ class Contract(gl.Contract):
             dispute_reason="",
         )
 
-        self.patents[patent_id] = new_patent
-        self.patent_ids.append(patent_id)
+        pid_key = str(patent_id)
+        self.patents[pid_key] = new_patent
+        self.patent_ids.append(pid_key)
         self.total_patent_locked = self.total_patent_locked + deposit
 
         return patent_id
@@ -195,10 +195,11 @@ class Contract(gl.Contract):
         Must stake an anti-griefing bond (at least 10% of patent escrow).
         Role: Challenger (cannot be the inventor).
         """
-        if patent_id not in self.patents:
+        pid_key = str(patent_id)
+        if pid_key not in self.patents:
             raise gl.UserError(f"Patent case {int(patent_id)} does not exist.")
 
-        p = self.patents[patent_id]
+        p = self.patents[pid_key]
         if p.status != STATUS_ACTIVE_PROTECTED:
             raise gl.UserError("Only active patents under protection can be challenged.")
 
@@ -237,10 +238,11 @@ class Contract(gl.Contract):
         reaching consensus on VERDICT.
         Transitions into STATUS_AWAITING_PAYOUT with cooling-off dispute window (24 blocks).
         """
-        if patent_id not in self.patents:
+        pid_key = str(patent_id)
+        if pid_key not in self.patents:
             raise gl.UserError(f"Patent case {int(patent_id)} does not exist.")
 
-        p = self.patents[patent_id]
+        p = self.patents[pid_key]
         if p.status != STATUS_IN_EXAMINATION:
             raise gl.UserError("Patent case is not awaiting collision adjudication.")
 
@@ -356,6 +358,7 @@ Respond ONLY with valid JSON without markdown fences:
                 85 if verdict_str == "PATENT_INVALIDATED" else 20
             )
             reason_str = str(parsed.get("reason", "Patent examination concluded."))
+            import hashlib
             evidence_hash = hashlib.sha256(raw_art.encode("utf-8")).hexdigest()
 
             return {
@@ -431,10 +434,11 @@ Respond ONLY with valid JSON without markdown fences:
         during the 24-block cooling-off dispute window. Freezes funds for protocol arbitration.
         Role: Inventor or Challenger.
         """
-        if patent_id not in self.patents:
+        pid_key = str(patent_id)
+        if pid_key not in self.patents:
             raise gl.UserError(f"Patent case {int(patent_id)} does not exist.")
 
-        p = self.patents[patent_id]
+        p = self.patents[pid_key]
         if p.status != STATUS_AWAITING_PAYOUT:
             raise gl.UserError("Can only dispute cases in AWAITING_PAYOUT status.")
 
@@ -458,10 +462,11 @@ Respond ONLY with valid JSON without markdown fences:
         has elapsed without an active dispute.
         Role: Public / Anyone (Self-executing settlement).
         """
-        if patent_id not in self.patents:
+        pid_key = str(patent_id)
+        if pid_key not in self.patents:
             raise gl.UserError(f"Patent case {int(patent_id)} does not exist.")
 
-        p = self.patents[patent_id]
+        p = self.patents[pid_key]
         if p.status != STATUS_AWAITING_PAYOUT:
             raise gl.UserError("Patent case is not awaiting settlement payout.")
 
@@ -498,7 +503,8 @@ Respond ONLY with valid JSON without markdown fences:
           - "UPHOLD": Inventor upheld, receives all funds
           - "REFUND_SPLIT": Cancel and return original deposits to respective parties
         """
-        if patent_id not in self.patents:
+        pid_key = str(patent_id)
+        if pid_key not in self.patents:
             raise gl.UserError(f"Patent case {int(patent_id)} does not exist.")
 
         caller = _addr_str(_get_sender())
@@ -508,7 +514,7 @@ Respond ONLY with valid JSON without markdown fences:
         if admin_addr == ZERO_ADDRESS:
             self.platform_admin = _get_sender()
 
-        p = self.patents[patent_id]
+        p = self.patents[pid_key]
         if p.status not in (STATUS_DISPUTED, STATUS_ESCALATED):
             raise gl.UserError("Patent case is not in DISPUTED or ESCALATED status.")
 
@@ -561,10 +567,11 @@ Respond ONLY with valid JSON without markdown fences:
         Inventor reclaims validity bond after protection duration expires with zero successful challenges.
         Role: Inventor only.
         """
-        if patent_id not in self.patents:
+        pid_key = str(patent_id)
+        if pid_key not in self.patents:
             raise gl.UserError(f"Patent case {int(patent_id)} does not exist.")
 
-        p = self.patents[patent_id]
+        p = self.patents[pid_key]
         if _addr_str(_get_sender()) != _addr_str(p.inventor):
             raise gl.UserError("Only the patent inventor can reclaim escrowed funds.")
 
@@ -600,10 +607,11 @@ Respond ONLY with valid JSON without markdown fences:
     @gl.public.view
     def get_patent(self, patent_id: u64) -> str:
         """Returns JSON serialized representation of a patent case."""
-        if patent_id not in self.patents:
+        pid_key = str(patent_id)
+        if pid_key not in self.patents:
             raise gl.UserError(f"Patent case {int(patent_id)} does not exist.")
 
-        p = self.patents[patent_id]
+        p = self.patents[pid_key]
         data = {
             "patent_id": int(p.patent_id),
             "inventor": _addr_str(p.inventor),
@@ -636,7 +644,7 @@ Respond ONLY with valid JSON without markdown fences:
     def get_patent_id_by_index(self, idx: int) -> u64:
         if idx < 0 or idx >= len(self.patent_ids):
             raise gl.UserError("Index out of bounds.")
-        return self.patent_ids[idx]
+        return u64(int(self.patent_ids[idx]))
 
     @gl.public.view
     def get_patents_paginated(self, offset: int, limit: int) -> str:
