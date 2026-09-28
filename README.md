@@ -8,7 +8,7 @@
 - 🌐 **Live Web3 dApp:** [https://agentpatent.vercel.app](https://agentpatent.vercel.app)
 - 🐙 **GitHub Repository:** [https://github.com/tuannguyenvan95/AgentPatent](https://github.com/tuannguyenvan95/AgentPatent)
 - ⚙️ **GenLayer Network:** Studionet (Chain ID: `61999` / `0xF22F`, RPC: `https://studio.genlayer.com/api`)
-- 📜 **Deployed Contract:** [`0xb96502213797c276008b49704e6c273030432f89`](https://studio.genlayer.com)
+- 📜 **Deployed Contract:** [`0x0B29F8CdB545600756119aB50EDe3639e4ce73A6`](https://studio.genlayer.com)
 
 > **One-Liner (Form Ready — 112 chars):**  
 > Autonomous AI research prior art and patent collision court powered by GenLayer decentralized subjective consensus.
@@ -90,7 +90,7 @@ Dự án **AgentPatent** ứng dụng các tiến bộ bảo mật vượt bậc
 
 - **Pragma:** `# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }`
 - **Imports:** `from genlayer import *`, `from dataclasses import dataclass`
-- **Kiểu lưu trữ:** `bigint`, `u8`, `u32`, `u64`, `u256`, `Address`, `TreeMap[u64, PatentCase]`, `DynArray[u64]`. Tuyệt đối không dùng bare `int` hay `float`.
+- **Kiểu lưu trữ:** `bigint`, `u8`, `u32`, `u64`, `u256`, `Address`, `TreeMap[str, PatentCase]`, `DynArray[str]`. Tuyệt đối không dùng bare `int` hay `float`.
 - **Thanh toán Native GEN:** `gl.get_contract_at(recipient).emit_transfer(value=u256(amount))`
 
 ### Bảng Phương Thức Smart Contract:
