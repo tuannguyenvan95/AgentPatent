@@ -4,31 +4,80 @@
 
 @layer base {
   body {
-    background-color: #F9FAFB;
-    color: #0F172A;
+    background-color: #080C18;
+    color: #E2E8F0;
     font-family: 'Inter', sans-serif;
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(197, 160, 89, 0.12), transparent),
+      radial-gradient(circle at 10% 20%, rgba(136, 19, 38, 0.08), transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(14, 22, 43, 0.8), transparent 60%);
+    background-attachment: fixed;
   }
 
-  h1, h2, h3, .font-scholarly {
-    font-family: 'Newsreader', 'Cinzel', serif;
+  h1, h2, h3 {
+    font-family: 'Cinzel', Georgia, serif;
+    letter-spacing: -0.01em;
   }
 }
 
-/* Custom scrollbars for academic ledger */
+/* Wax Seal & Gold Embellishments */
+.wax-seal-red {
+  background: radial-gradient(circle at 35% 35%, #B71C1C, #881326 60%, #4A0710 100%);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.25),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+  border: 2px solid #D4AF37;
+}
+
+.wax-seal-green {
+  background: radial-gradient(circle at 35% 35%, #2E7D32, #1B5E20 60%, #0A260C 100%);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.25),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+  border: 2px solid #D4AF37;
+}
+
+.wax-seal-amber {
+  background: radial-gradient(circle at 35% 35%, #D97706, #92400E 60%, #451A03 100%);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.25),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
+  border: 2px solid #E5C158;
+}
+
+.gold-foil-border {
+  border-image: linear-gradient(135deg, #F3E5AB 0%, #C5A059 50%, #8A6827 100%) 1;
+}
+
+.gold-text-gradient {
+  background: linear-gradient(135deg, #FFF6D6 0%, #E5C158 50%, #C5A059 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.burgundy-gradient {
+  background: linear-gradient(145deg, #881326 0%, #500B17 100%);
+}
+
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #080C18;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 3px;
+  background: #233257;
+  border: 1px solid #C5A059;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #C5A059;
 }

@@ -10,6 +10,8 @@ import {
   Copy,
   ChevronDown,
   ShieldCheck,
+  Gavel,
+  Scroll,
 } from 'lucide-react';
 import { truncateAddress } from '../utils/helpers';
 import { STUDIONET_CHAIN_ID, STUDIO_URL } from '../config/genlayer';
@@ -53,80 +55,83 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#FFFFFF]/95 backdrop-blur-md border-b border-[#E2E8F0] shadow-sm">
+    <header className="sticky top-0 z-30 bg-[#090E1F]/95 backdrop-blur-md border-b border-[#C5A059]/30 shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo & Identity */}
+        <div className="flex items-center justify-between h-22 py-2">
+          {/* Imperial Crest & Tribunal Name */}
           <div className="flex items-center space-x-3.5">
-            <div className="h-11 w-11 rounded-lg bg-[#0F172A] flex items-center justify-center text-white shadow-md ring-1 ring-slate-900/10">
-              <Scale className="h-6 w-6 text-teal-400" />
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#881326] to-[#450A13] flex items-center justify-center text-amber-300 shadow-burgundy-glow border border-[#C5A059]/60 relative group">
+              <Scale className="h-6 w-6 text-[#E5C158]" />
+              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-[#C5A059] flex items-center justify-center text-[9px] text-[#0A1128] font-bold">
+                §
+              </div>
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-serif text-2xl font-bold tracking-tight text-[#0F172A]">
-                  AgentPatent
+                <span className="font-cinzel text-xl sm:text-2xl font-black tracking-wider text-[#F5EFE0] drop-shadow-sm">
+                  AGENTPATENT
                 </span>
-                <span className="text-[11px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
-                  v3 Court
+                <span className="text-[10px] uppercase tracking-widest font-serif font-bold px-2 py-0.5 rounded bg-[#881326]/60 text-amber-200 border border-[#C5A059]/40">
+                  Supreme Tribunal
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-medium">
-                Autonomous AI Research Prior Art & Patent Collision Court
+              <p className="text-[11px] font-cormorant italic text-[#C5A059] tracking-wide">
+                Curia Maxima de Collisionibus Inventionum • GenLayer Studionet
               </p>
             </div>
           </div>
 
-          {/* Network & Actions */}
+          {/* Network & Court Controls */}
           <div className="flex items-center space-x-3">
             {/* Studionet Pill */}
-            <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-[#121D38] border border-[#C5A059]/30 text-xs font-mono text-amber-200/90 shadow-inner">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>Studionet ({STUDIONET_CHAIN_ID})</span>
             </div>
 
-            {/* Faucet Aid Button */}
+            {/* Treasury GEN Guide */}
             <button
               onClick={() => setShowFaucetHelp(!showFaucetHelp)}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors"
-              title="How to get testnet GEN"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-serif font-semibold text-amber-200 bg-[#881326]/30 hover:bg-[#881326]/50 border border-[#C5A059]/40 transition-colors shadow-sm"
+              title="How to obtain Treasury GEN"
             >
-              <Coins className="h-3.5 w-3.5 text-amber-600" />
-              <span className="hidden sm:inline">Get GEN</span>
-              <ChevronDown className="h-3 w-3 text-amber-600" />
+              <Coins className="h-3.5 w-3.5 text-[#E5C158]" />
+              <span className="hidden sm:inline">Treasury GEN</span>
+              <ChevronDown className="h-3 w-3 text-[#C5A059]" />
             </button>
 
-            {/* Register Patent Button */}
+            {/* Enact Patent Deed */}
             <button
               onClick={onOpenRegisterModal}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#0F172A] hover:bg-slate-800 shadow-sm transition-all active:scale-95"
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-cinzel font-bold text-[#090E1F] bg-gradient-to-r from-[#FFF6D6] via-[#E5C158] to-[#C5A059] hover:from-white hover:to-[#E5C158] shadow-gold-glow transition-all active:scale-95"
             >
-              <PlusCircle className="h-4 w-4 text-teal-300" />
-              <span>Deposit Patent Claims</span>
+              <Scroll className="h-4 w-4 text-[#090E1F]" />
+              <span>Enroll Patent Claim</span>
             </button>
 
-            {/* Wallet Connect / User Pill */}
+            {/* Wallet Section */}
             {userAddress ? (
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-lg p-1">
-                <div className="px-2.5 py-1 text-xs font-medium text-slate-700">
-                  <span className="text-slate-400 font-normal">Balance: </span>
-                  <span className="font-semibold text-teal-700">{userBalance} GEN</span>
+              <div className="flex items-center space-x-2 bg-[#121D38] border border-[#C5A059]/40 rounded-xl p-1 shadow-md">
+                <div className="px-3 py-1 text-xs">
+                  <span className="text-[#94A3B8] font-serif text-[11px]">Vault: </span>
+                  <span className="font-mono font-bold text-[#E5C158]">{userBalance} GEN</span>
                 </div>
                 <button
                   onClick={copyAddress}
-                  className="flex items-center space-x-1 px-2.5 py-1 text-xs font-mono bg-white border border-slate-200 rounded hover:bg-slate-50 transition-colors"
-                  title="Click to copy full address"
+                  className="flex items-center space-x-1 px-2.5 py-1 text-xs font-mono bg-[#090E1F] border border-[#C5A059]/30 rounded-lg hover:border-[#C5A059] transition-colors text-slate-300"
+                  title="Copy Advocate Address"
                 >
                   {copied ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                   ) : (
-                    <Copy className="h-3.5 w-3.5 text-slate-400" />
+                    <Copy className="h-3.5 w-3.5 text-[#C5A059]" />
                   )}
                   <span>{truncateAddress(userAddress)}</span>
                 </button>
                 <button
                   onClick={onDisconnectWallet}
-                  className="px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                  title="Disconnect Wallet"
+                  className="px-2 py-1 text-xs font-serif text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded transition-colors"
+                  title="Recuse Counselor"
                 >
                   Exit
                 </button>
@@ -134,21 +139,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <button
                 onClick={onConnectWallet}
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-semibold text-teal-900 bg-teal-50 hover:bg-teal-100 border border-teal-200 shadow-sm transition-all"
+                className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-cinzel font-bold text-amber-200 bg-[#881326] hover:bg-[#A31B32] border border-[#C5A059]/60 shadow-burgundy-glow transition-all"
               >
-                <Wallet className="h-4 w-4 text-teal-600" />
+                <Wallet className="h-4 w-4 text-[#E5C158]" />
                 <span>Connect MetaMask</span>
               </button>
             )}
 
-            {/* Settings Trigger */}
+            {/* Tribunal Seal Settings */}
             <button
               onClick={() => {
                 setTempAddress(contractAddress);
                 setShowSettings(true);
               }}
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-              title="Contract Settings"
+              className="p-2 rounded-xl text-[#C5A059] hover:text-amber-100 hover:bg-[#121D38] border border-transparent hover:border-[#C5A059]/30 transition-colors"
+              title="Configure Deployed Contract"
             >
               <Settings className="h-4 w-4" />
             </button>
@@ -156,28 +161,28 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Faucet Help Dropdown Banner */}
+      {/* Treasury Help Banner */}
       {showFaucetHelp && (
-        <div className="bg-amber-50/95 border-b border-amber-200 px-4 py-3 text-xs text-amber-900 shadow-inner">
+        <div className="bg-[#121D38] border-b border-[#C5A059]/30 px-4 py-3 text-xs text-amber-100/90 shadow-inner">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="flex items-center space-x-2">
-              <ShieldCheck className="h-4 w-4 text-amber-700 flex-shrink-0" />
+              <ShieldCheck className="h-4 w-4 text-[#E5C158] flex-shrink-0" />
               <span>
-                <strong>Need GEN to stake or register?</strong> On GenLayer Studionet, fund your MetaMask wallet by transferring 10-50 GEN from the pre-funded accounts in{' '}
+                <strong>Require GEN for Escrow or Litigation?</strong> In GenLayer Studionet, disburse 10–50 GEN directly into your MetaMask from pre-funded accounts in the{' '}
                 <a
                   href={STUDIO_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline font-semibold hover:text-amber-950 inline-flex items-center"
+                  className="underline font-semibold text-[#E5C158] hover:text-white inline-flex items-center"
                 >
-                  GenLayer Studio Accounts panel
+                  GenLayer Studio Accounts Console
                   <ExternalLink className="h-3 w-3 ml-0.5 inline" />
                 </a>.
               </span>
             </div>
             <button
               onClick={() => setShowFaucetHelp(false)}
-              className="text-amber-700 hover:text-amber-950 text-xs font-semibold underline"
+              className="text-[#C5A059] hover:text-white text-xs font-cinzel underline font-bold"
             >
               Dismiss
             </button>
@@ -187,26 +192,29 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Contract Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <h3 className="font-serif text-lg font-bold text-slate-900 mb-1">
-              Contract Configuration
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Connect to your deployed AgentPatent Intelligent Contract on GenLayer Studionet.
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+          <div className="bg-[#0E162B] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#C5A059]/50 text-slate-200">
+            <div className="flex items-center space-x-2.5 mb-2">
+              <Gavel className="h-5 w-5 text-[#E5C158]" />
+              <h3 className="font-cinzel text-lg font-bold text-amber-200">
+                Tribunal Registry Registry
+              </h3>
+            </div>
+            <p className="text-xs text-slate-400 font-serif mb-4 leading-relaxed">
+              Connect to your deployed AgentPatent Intelligent Contract on GenLayer Studionet (Chain 61999).
             </p>
 
             <form onSubmit={handleSaveSettings}>
               <div className="mb-4">
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Contract Address (Hex)
+                <label className="block text-xs font-cinzel font-semibold text-[#C5A059] mb-1">
+                  Contract Address (Hexadecimal)
                 </label>
                 <input
                   type="text"
                   value={tempAddress}
                   onChange={(e) => setTempAddress(e.target.value)}
                   placeholder="0x..."
-                  className="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 text-xs font-mono bg-[#080C18] border border-[#C5A059]/40 rounded-lg text-amber-200 focus:outline-none focus:ring-1 focus:ring-[#E5C158]"
                 />
               </div>
 
@@ -214,15 +222,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowSettings(false)}
-                  className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-md"
+                  className="px-3 py-1.5 text-xs font-serif text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-md shadow-sm"
+                  className="px-4 py-1.5 text-xs font-cinzel font-bold text-[#090E1F] bg-gradient-to-r from-[#E5C158] to-[#C5A059] hover:from-white hover:to-[#E5C158] rounded-lg shadow-gold-glow"
                 >
-                  Save Address
+                  Ratify Address
                 </button>
               </div>
             </form>

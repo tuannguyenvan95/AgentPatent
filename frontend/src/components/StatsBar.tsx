@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Lock, FileSearch, CheckCircle2, UserCheck } from 'lucide-react';
+import { Shield, Lock, FileSearch, Gavel, UserCheck, Sparkles } from 'lucide-react';
 import { ProtocolStats } from '../config/genlayer';
 import { formatGen, truncateAddress } from '../utils/helpers';
 
@@ -11,96 +11,99 @@ interface StatsBarProps {
 export const StatsBar: React.FC<StatsBarProps> = ({ stats, loading }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      {/* Total Patents */}
-      <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-all">
+      {/* Imperial Rolls of Inventions */}
+      <div className="bg-[#0E162B] rounded-2xl p-5 border border-[#C5A059]/30 shadow-court-panel relative overflow-hidden group hover:border-[#C5A059]/70 transition-all">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-radial from-[#C5A059]/10 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Patents Filed
+            <p className="text-[11px] font-cinzel font-bold uppercase tracking-wider text-[#C5A059]">
+              Patents Enrolled
             </p>
-            <p className="mt-1 font-serif text-3xl font-bold text-slate-900">
+            <p className="mt-1 font-cinzel text-3xl font-black text-[#F5EFE0] tracking-tight">
               {loading ? '—' : stats.total_patents}
             </p>
           </div>
-          <div className="h-10 w-10 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700">
-            <Shield className="h-5 w-5" />
+          <div className="h-11 w-11 rounded-xl bg-[#881326]/40 border border-[#C5A059]/40 flex items-center justify-center text-[#E5C158] shadow-inner">
+            <Shield className="h-5 w-5 text-[#E5C158]" />
           </div>
         </div>
-        <div className="mt-3 flex items-center text-[11px] text-slate-500">
-          <span className="font-medium text-teal-700">Novelty claims</span>
-          <span className="mx-1">•</span>
-          <span>Subject to AI prior art search</span>
+        <div className="mt-3 flex items-center text-[11px] font-cormorant italic text-slate-300">
+          <span className="font-semibold text-[#E5C158]">Sub Sigillo Curiae</span>
+          <span className="mx-1.5 text-slate-600">•</span>
+          <span>Formal specification on-chain</span>
         </div>
       </div>
 
-      {/* Total Escrow Locked */}
-      <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-all">
+      {/* Escrow Bond Vault */}
+      <div className="bg-[#0E162B] rounded-2xl p-5 border border-[#C5A059]/30 shadow-court-panel relative overflow-hidden group hover:border-[#C5A059]/70 transition-all">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-radial from-[#E5C158]/10 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Locked Escrow
+            <p className="text-[11px] font-cinzel font-bold uppercase tracking-wider text-[#C5A059]">
+              Locked Vault Escrow
             </p>
-            <p className="mt-1 font-serif text-3xl font-bold text-teal-800">
+            <p className="mt-1 font-cinzel text-3xl font-black text-[#E5C158] tracking-tight">
               {loading ? '—' : `${formatGen(stats.total_patent_locked)}`}
-              <span className="text-sm font-sans font-normal text-slate-500 ml-1">GEN</span>
+              <span className="text-sm font-sans font-normal text-slate-400 ml-1">GEN</span>
             </p>
           </div>
-          <div className="h-10 w-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700">
-            <Lock className="h-5 w-5" />
+          <div className="h-11 w-11 rounded-xl bg-[#121D38] border border-[#C5A059]/50 flex items-center justify-center text-[#E5C158] shadow-inner">
+            <Lock className="h-5 w-5 text-[#E5C158]" />
           </div>
         </div>
-        <div className="mt-3 flex items-center text-[11px] text-slate-500">
-          <span className="font-medium text-indigo-700">Validity & challenge bonds</span>
-          <span className="mx-1">•</span>
-          <span>Zero loss protocol</span>
+        <div className="mt-3 flex items-center text-[11px] font-cormorant italic text-slate-300">
+          <span className="font-semibold text-emerald-400">Guaranteed Custody</span>
+          <span className="mx-1.5 text-slate-600">•</span>
+          <span>Zero loss protocol invariants</span>
         </div>
       </div>
 
-      {/* Active Examinations */}
-      <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-all">
+      {/* Active Tribunal Inquests */}
+      <div className="bg-[#0E162B] rounded-2xl p-5 border border-[#C5A059]/30 shadow-court-panel relative overflow-hidden group hover:border-[#C5A059]/70 transition-all">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-radial from-[#881326]/20 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Active Inquiries
+            <p className="text-[11px] font-cinzel font-bold uppercase tracking-wider text-[#C5A059]">
+              Active Inquests
             </p>
-            <p className="mt-1 font-serif text-3xl font-bold text-amber-700">
+            <p className="mt-1 font-cinzel text-3xl font-black text-amber-300 tracking-tight">
               {loading ? '—' : stats.active_examinations ?? 0}
             </p>
           </div>
-          <div className="h-10 w-10 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700">
+          <div className="h-11 w-11 rounded-xl bg-amber-950/40 border border-amber-600/40 flex items-center justify-center text-amber-300 shadow-inner">
             <FileSearch className="h-5 w-5" />
           </div>
         </div>
-        <div className="mt-3 flex items-center text-[11px] text-slate-500">
-          <span className="font-medium text-amber-700">Under examination</span>
-          <span className="mx-1">•</span>
-          <span>24-block cooling off window</span>
+        <div className="mt-3 flex items-center text-[11px] font-cormorant italic text-slate-300">
+          <span className="font-semibold text-amber-300">Sub Judice</span>
+          <span className="mx-1.5 text-slate-600">•</span>
+          <span>24-Block cooling-off timelock</span>
         </div>
       </div>
 
-      {/* Total Collisions Resolved */}
-      <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-all">
+      {/* Sovereign Decrees Executed */}
+      <div className="bg-[#0E162B] rounded-2xl p-5 border border-[#C5A059]/30 shadow-court-panel relative overflow-hidden group hover:border-[#C5A059]/70 transition-all">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Adjudications Settled
+            <p className="text-[11px] font-cinzel font-bold uppercase tracking-wider text-[#C5A059]">
+              Decrees Handed Down
             </p>
-            <p className="mt-1 font-serif text-3xl font-bold text-slate-900">
+            <p className="mt-1 font-cinzel text-3xl font-black text-[#F5EFE0] tracking-tight">
               {loading ? '—' : stats.total_disputes_resolved}
             </p>
           </div>
-          <div className="h-10 w-10 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700">
-            <CheckCircle2 className="h-5 w-5" />
+          <div className="h-11 w-11 rounded-xl bg-emerald-950/40 border border-emerald-600/40 flex items-center justify-center text-emerald-400 shadow-inner">
+            <Gavel className="h-5 w-5" />
           </div>
         </div>
-        <div className="mt-3 flex items-center text-[11px] text-slate-500">
+        <div className="mt-3 flex items-center text-[11px] font-cormorant italic text-slate-300 truncate">
           {stats.platform_admin ? (
-            <span className="inline-flex items-center gap-1 font-mono text-slate-600">
-              <UserCheck className="h-3 w-3 text-slate-400" />
+            <span className="inline-flex items-center gap-1 font-mono text-slate-400">
+              <UserCheck className="h-3 w-3 text-[#C5A059]" />
               Steward: {truncateAddress(stats.platform_admin)}
             </span>
           ) : (
-            <span>Autonomous on-chain resolution</span>
+            <span>Autonomous GenLayer AI Consensus</span>
           )}
         </div>
       </div>
