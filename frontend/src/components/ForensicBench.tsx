@@ -38,7 +38,7 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
 }) => {
   if (!patent) {
     return (
-      <main className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#070A11] h-[calc(100vh-4.5rem)] relative overflow-hidden">
+      <main className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#070A11] h-[calc(100vh-4rem)] relative overflow-hidden">
         {/* Radar Background grid decoration */}
         <div className="absolute inset-0 bg-cyber-grid bg-[size:30px_30px] opacity-15 pointer-events-none" />
         <div className="h-20 w-20 rounded-2xl bg-[#0A0E17] border border-cyan-500/40 flex items-center justify-center text-cyan-400 mb-4 shadow-[0_0_25px_rgba(6,182,212,0.25)] relative">
@@ -67,7 +67,7 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
   const strokeDashoffset = circumference - (patent.overlap_score / 100) * circumference;
 
   return (
-    <main className="flex-1 flex flex-col bg-[#070A11] h-[calc(100vh-4.5rem)] overflow-y-auto relative">
+    <main className="flex-1 flex flex-col bg-[#070A11] h-[calc(100vh-4rem)] overflow-y-auto relative">
       {/* Background Cyber Grid */}
       <div className="absolute inset-0 bg-cyber-grid bg-[size:36px_36px] opacity-15 pointer-events-none" />
 

@@ -39,7 +39,7 @@ export const DossierSidebar: React.FC<DossierSidebarProps> = ({
   loading,
 }) => {
   return (
-    <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col bg-[#0A0E17]/95 border-r border-[#06B6D4]/20 h-[calc(100vh-4.5rem)] overflow-hidden">
+    <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col bg-[#0A0E17]/95 border-r border-[#06B6D4]/20 h-[calc(100vh-4rem)] overflow-hidden">
       {/* Sidebar Header & Enrollment Trigger */}
       <div className="p-4 border-b border-[#1E293B] bg-[#070A11]/80 space-y-3">
         <div className="flex items-center justify-between">

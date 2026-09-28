@@ -16,6 +16,8 @@ import {
   Cpu,
   Zap,
   Terminal,
+  User,
+  Info,
 } from 'lucide-react';
 import { PatentCaseData, ProtocolStats } from '../config/genlayer';
 import { formatGen, truncateAddress, getStatusMeta } from '../utils/helpers';
@@ -45,13 +47,38 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
   onReclaimExpired,
   actionLoading,
 }) => {
-  const isInventor = userAddress && patent && patent.inventor.toLowerCase() === userAddress.toLowerCase();
-  const isChallenger = userAddress && patent && patent.challenger.toLowerCase() === userAddress.toLowerCase();
-  const isAdmin = userAddress && stats.platform_admin && stats.platform_admin.toLowerCase() === userAddress.toLowerCase();
+  const isInventor = !!(userAddress && patent && patent.inventor.toLowerCase() === userAddress.toLowerCase());
+  const isChallenger = !!(userAddress && patent && patent.challenger.toLowerCase() === userAddress.toLowerCase());
+  const isAdmin = !!(userAddress && stats.platform_admin && stats.platform_admin.toLowerCase() === userAddress.toLowerCase());
   const statusMeta = patent ? getStatusMeta(patent.status) : null;
 
+  // Active Role computation
+  let currentRoleLabel = 'OBSERVER (WALLET NOT CONNECTED)';
+  let currentRoleBadge = 'bg-slate-800 text-slate-400 border-slate-700';
+  let roleIconColor = 'text-slate-500';
+
+  if (userAddress) {
+    if (isAdmin) {
+      currentRoleLabel = 'PROTOCOL ADMIN / STEWARD';
+      currentRoleBadge = 'bg-purple-950/80 text-purple-300 border-purple-500/50';
+      roleIconColor = 'text-purple-400';
+    } else if (isInventor) {
+      currentRoleLabel = 'PATENT APPLICANT / INVENTOR';
+      currentRoleBadge = 'bg-cyan-950/80 text-cyan-300 border-cyan-500/50';
+      roleIconColor = 'text-cyan-400';
+    } else if (isChallenger) {
+      currentRoleLabel = 'PRIOR ART CHALLENGER';
+      currentRoleBadge = 'bg-rose-950/80 text-rose-300 border-rose-500/50';
+      roleIconColor = 'text-rose-400';
+    } else {
+      currentRoleLabel = 'INDEPENDENT RESEARCHER / AUDITOR';
+      currentRoleBadge = 'bg-teal-950/80 text-teal-300 border-teal-500/50';
+      roleIconColor = 'text-teal-400';
+    }
+  }
+
   return (
-    <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col bg-[#0A0E17]/95 border-l border-[#06B6D4]/20 h-[calc(100vh-4.5rem)] overflow-y-auto p-4 space-y-4">
+    <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col bg-[#0A0E17]/95 border-l border-[#06B6D4]/20 h-[calc(100vh-4rem)] overflow-y-auto p-4 space-y-4">
       {/* Panel 1: Contextual Litigation Action Hub */}
       <div className="bg-[#0F1523]/80 rounded-2xl p-4 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.1)] space-y-3">
         <div className="flex items-center space-x-2 pb-2 border-b border-[#1E293B]">
@@ -60,6 +87,22 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
             <span>Litigation Matrix</span>
             <span className="text-[10px] text-cyan-400 font-mono">// EXEC-01</span>
           </h3>
+        </div>
+
+        {/* User Role Telemetry Pill */}
+        <div className="p-2.5 rounded-xl bg-[#070A11] border border-[#1E293B] space-y-1.5 text-xs font-mono">
+          <div className="flex items-center justify-between">
+            <span className="text-slate-400 flex items-center gap-1.5 text-[11px]">
+              <User className={`h-3.5 w-3.5 ${roleIconColor}`} />
+              YOUR ROLE:
+            </span>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${currentRoleBadge}`}>
+              {currentRoleLabel.split(' / ')[0]}
+            </span>
+          </div>
+          <p className="text-[10px] text-slate-500">
+            {userAddress ? `${truncateAddress(userAddress)}` : 'Connect wallet to execute on-chain decrees'}
+          </p>
         </div>
 
         {patent ? (
@@ -76,12 +119,12 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
               </p>
             </div>
 
-            {/* Action Buttons based on status */}
+            {/* Action Buttons based on status & role */}
             <div className="space-y-2">
               {/* Status 0: ACTIVE_PROTECTED */}
               {patent.status === 0 && (
                 <>
-                  {!isInventor && (
+                  {!isInventor ? (
                     <button
                       onClick={() => onOpenChallenge(patent)}
                       disabled={actionLoading}
@@ -90,7 +133,18 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
                       <Scale className="h-4 w-4 text-rose-300" />
                       <span>Stake Bond & Indict Prior Art</span>
                     </button>
+                  ) : (
+                    <div className="p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-500/40 text-[11px] font-mono text-cyan-300 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <Info className="h-3.5 w-3.5 text-cyan-400" />
+                        <span>Registered Inventor</span>
+                      </div>
+                      <p className="text-slate-400 text-[10px]">
+                        Self-challenge is barred by contract consensus. Escrow is protected under term limit.
+                      </p>
+                    </div>
                   )}
+
                   {isInventor && (
                     <button
                       onClick={() => onReclaimExpired(patent.patent_id)}
@@ -106,29 +160,39 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
 
               {/* Status 1: IN_EXAMINATION */}
               {patent.status === 1 && (
-                <button
-                  onClick={() => onAdjudicate(patent.patent_id)}
-                  disabled={actionLoading}
-                  className="w-full py-2.5 px-3 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-[#070A11] bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all flex items-center justify-center space-x-2 active:scale-98"
-                >
-                  <Gavel className="h-4 w-4 stroke-[2.5]" />
-                  <span>Execute Consensus Adjudication</span>
-                </button>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => onAdjudicate(patent.patent_id)}
+                    disabled={actionLoading}
+                    className="w-full py-2.5 px-3 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-[#070A11] bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all flex items-center justify-center space-x-2 active:scale-98"
+                  >
+                    <Gavel className="h-4 w-4 stroke-[2.5]" />
+                    <span>Trigger AI Bench Deliberation</span>
+                  </button>
+                  <p className="text-[10px] font-mono text-slate-500 text-center">
+                    Multi-validator consensus runs live web scraping via gl.nondet.web.render
+                  </p>
+                </div>
               )}
 
-              {/* Status 2: AWAITING_PAYOUT */}
+              {/* Status 2: AWAITING_PAYOUT (24-block Cooling-Off Grace Period) */}
               {patent.status === 2 && (
                 <>
-                  {(isInventor || isChallenger) && (
+                  {(isInventor || isChallenger) ? (
                     <button
                       onClick={() => onOpenDispute(patent)}
                       disabled={actionLoading}
                       className="w-full py-2.5 px-3 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-amber-200 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-500 transition-all flex items-center justify-center space-x-2"
                     >
                       <AlertTriangle className="h-4 w-4 text-amber-400" />
-                      <span>Lodge Appellate Dispute</span>
+                      <span>Lodge Appellate Dispute (Writ)</span>
                     </button>
+                  ) : (
+                    <div className="p-2 rounded-lg bg-indigo-950/30 border border-indigo-500/40 text-[10px] font-mono text-indigo-300">
+                      24-Block cooling-off in effect. Only Inventor or Challenger can dispute before settlement.
+                    </div>
                   )}
+
                   <button
                     onClick={() => onFinalizeSettlement(patent.patent_id)}
                     disabled={actionLoading}
@@ -154,7 +218,7 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
                     </button>
                   ) : (
                     <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-600/50 text-[11px] text-amber-200 text-center font-mono">
-                      // ESCALATED: Pending Protocol Admin arbitration hearing.
+                      // ESCALATED: Pending Protocol Admin ({truncateAddress(stats.platform_admin || '')}) arbitration.
                     </div>
                   )}
                 </>
@@ -163,7 +227,7 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
               {/* Status 3, 4, 5: SETTLED */}
               {(patent.status === 3 || patent.status === 4 || patent.status === 5) && (
                 <div className="p-2.5 rounded-lg bg-[#070A11] border border-teal-500/40 text-[11px] text-teal-300 text-center font-mono">
-                  // DECREE FINALIZED: Escrow reconciled and disbursed.
+                  // DECREE FINALIZED: Escrow reconciled and disbursed on-chain.
                 </div>
               )}
             </div>
