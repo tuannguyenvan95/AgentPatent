@@ -24,102 +24,122 @@ export function parseGenToWei(genStr: string | number): bigint {
 }
 
 export function truncateAddress(addr: string): string {
-  if (!addr || addr === '0x0000000000000000000000000000000000000000') return 'Unassigned';
+  if (!addr || addr === '0x0000000000000000000000000000000000000000') return 'UNASSIGNED';
   if (addr.length <= 12) return addr;
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`.toUpperCase();
 }
 
 export interface StatusMeta {
+  code: string;
   label: string;
-  latinMotto: string;
   badgeBg: string;
-  sealType: 'green' | 'red' | 'amber' | 'neutral';
+  ledColor: string;
   borderColor: string;
   description: string;
+  latinMotto: string;
+  sealType: 'red' | 'green' | 'amber' | 'neutral';
 }
 
 export function getStatusMeta(status: number): StatusMeta {
   switch (status) {
     case 0:
       return {
-        label: 'ENROLLED & DEFENDED',
+        code: 'SEC-0',
+        label: 'NOVELTY_ACTIVE',
+        badgeBg: 'bg-teal-500/10 text-teal-300 border-teal-500/30',
+        ledColor: 'bg-teal-400 animate-pulse',
+        borderColor: 'border-teal-500/30 hover:border-teal-400/50',
+        description: 'Patent novelty claims locked on-chain. Open for peer examination.',
         latinMotto: 'Sub Sigillo Inventoris',
-        badgeBg: 'bg-emerald-950/80 text-emerald-300 border-emerald-600/50',
-        sealType: 'green',
-        borderColor: 'border-emerald-700/50',
-        description: 'Enrolled under High Court Seal. Open for public prior art examination.',
+        sealType: 'neutral',
       };
     case 1:
       return {
-        label: 'SUB JUDICE / INQUIRY',
-        latinMotto: 'Sub Judice Lis Pendens',
-        badgeBg: 'bg-amber-950/80 text-amber-300 border-amber-600/50',
+        code: 'RAD-1',
+        label: 'RADAR_SCANNING',
+        badgeBg: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+        ledColor: 'bg-amber-400 animate-pulse',
+        borderColor: 'border-amber-500/40 hover:border-amber-400/60',
+        description: 'Challenger staked bond. GenLayer AI Examination Board convened.',
+        latinMotto: 'Inquisitio Iudicialis',
         sealType: 'amber',
-        borderColor: 'border-amber-600/60',
-        description: 'Adversary bond staked. Convening Autonomous AI Patent Bench.',
       };
     case 2:
       return {
-        label: 'PROVISIONAL DECREE (COOLING-OFF)',
-        latinMotto: 'Indutiae Legales (24 Blocks)',
-        badgeBg: 'bg-indigo-950/80 text-indigo-300 border-indigo-500/50',
+        code: 'TIM-2',
+        label: 'COOLING_OFF (24B)',
+        badgeBg: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30',
+        ledColor: 'bg-cyan-400 animate-ping',
+        borderColor: 'border-cyan-500/40 hover:border-cyan-400/60',
+        description: 'AI verdict reached. 24-block timelock grace period active for dispute.',
+        latinMotto: 'Indutiae Legales',
         sealType: 'amber',
-        borderColor: 'border-indigo-500/60',
-        description: 'Verdict rendered. 24-block grace period active for appellate challenge.',
       };
     case 3:
       return {
-        label: 'DECLARED VOID (ANNULLED)',
-        latinMotto: 'Nullum atque Inane Ab Initio',
-        badgeBg: 'bg-rose-950/90 text-rose-300 border-rose-600/60',
+        code: 'ALR-3',
+        label: 'COLLISION_SLASHED',
+        badgeBg: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
+        ledColor: 'bg-rose-500',
+        borderColor: 'border-rose-500/50 hover:border-rose-400/70',
+        description: 'Prior Art anticipated core claims. Escrow bond slashed to challenger.',
+        latinMotto: 'Decretum Invaliditatis',
         sealType: 'red',
-        borderColor: 'border-rose-700/70',
-        description: 'Prior Art anticipation proven beyond doubt. Validity escrow slashed to challenger.',
       };
     case 4:
       return {
-        label: 'UPHELD BY SOVEREIGN DECREE',
-        latinMotto: 'Inventum Inviolabile Ratum',
-        badgeBg: 'bg-teal-950/90 text-teal-300 border-teal-500/60',
+        code: 'VER-4',
+        label: 'NOVEL_VERIFIED',
+        badgeBg: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
+        ledColor: 'bg-emerald-400',
+        borderColor: 'border-emerald-500/40 hover:border-emerald-400/60',
+        description: 'Inventive step verified. Challenger bond forfeited to inventor.',
+        latinMotto: 'Inventum Confirmatum',
         sealType: 'green',
-        borderColor: 'border-teal-600/70',
-        description: 'Novelty established. Challenger bond forfeited to inventor.',
       };
     case 5:
       return {
-        label: 'EXPIRED & RECLAIMED',
-        latinMotto: 'Tempus Reversionis Absolutum',
-        badgeBg: 'bg-slate-900/90 text-slate-300 border-slate-700/60',
+        code: 'EXP-5',
+        label: 'TERM_RECLAIMED',
+        badgeBg: 'bg-slate-500/10 text-slate-300 border-slate-500/30',
+        ledColor: 'bg-slate-500',
+        borderColor: 'border-slate-700 hover:border-slate-500',
+        description: 'Protection duration concluded uncontested. Escrow returned to inventor.',
+        latinMotto: 'Terminus Exspiratus',
         sealType: 'neutral',
-        borderColor: 'border-slate-700/60',
-        description: 'Patent term concluded without invalidating claims. Escrow returned to inventor.',
       };
     case 6:
       return {
-        label: 'APPELLATE WRIT OF DISPUTE',
-        latinMotto: 'Provocatio ad Tribunal',
-        badgeBg: 'bg-orange-950/90 text-orange-300 border-orange-600/60',
-        sealType: 'red',
-        borderColor: 'border-orange-600/70',
-        description: 'Verdict contested under formal writ. Escrow frozen for Chief Justice arbitration.',
+        code: 'DSP-6',
+        label: 'DISPUTE_FROZEN',
+        badgeBg: 'bg-orange-500/10 text-orange-300 border-orange-500/30',
+        ledColor: 'bg-orange-400 animate-pulse',
+        borderColor: 'border-orange-500/50 hover:border-orange-400/70',
+        description: 'Verdict contested under formal writ. Escrow frozen for protocol arbitration.',
+        latinMotto: 'Sub Lite Pendente',
+        sealType: 'amber',
       };
     case 7:
       return {
-        label: 'CHIEF JUSTICE ESCALATION',
-        latinMotto: 'Ad Judicium Praesidis',
-        badgeBg: 'bg-purple-950/90 text-purple-300 border-purple-600/60',
+        code: 'ESC-7',
+        label: 'STEWARD_ESCALATED',
+        badgeBg: 'bg-purple-500/10 text-purple-300 border-purple-500/30',
+        ledColor: 'bg-purple-400 animate-pulse',
+        borderColor: 'border-purple-500/50 hover:border-purple-400/70',
+        description: 'Canary token alert or confidence threshold triggered. Under steward review.',
+        latinMotto: 'Ad Iudicem Supremum',
         sealType: 'amber',
-        borderColor: 'border-purple-600/70',
-        description: 'Security canary or uncertainty threshold triggered. Under sovereign review.',
       };
     default:
       return {
-        label: 'UNKNOWN STATUS',
-        latinMotto: 'Incognitus',
-        badgeBg: 'bg-gray-900 text-gray-300 border-gray-700',
+        code: 'UNK',
+        label: 'UNKNOWN_STATE',
+        badgeBg: 'bg-gray-800 text-gray-400 border-gray-700',
+        ledColor: 'bg-gray-500',
+        borderColor: 'border-gray-800',
+        description: 'Unrecognized patent status.',
+        latinMotto: 'Status Incognitus',
         sealType: 'neutral',
-        borderColor: 'border-gray-700',
-        description: 'Docket status not recognized.',
       };
   }
 }

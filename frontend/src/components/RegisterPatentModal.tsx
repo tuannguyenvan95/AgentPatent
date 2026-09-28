@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Shield, AlertCircle, Loader2, Scroll, Feather } from 'lucide-react';
+import { X, Sparkles, Shield, AlertCircle, Loader2, Cpu, Zap, Layers } from 'lucide-react';
 import { PRESET_PATENTS, PresetPatent } from '../utils/helpers';
 
 interface RegisterPatentModalProps {
@@ -65,20 +65,20 @@ export const RegisterPatentModal: React.FC<RegisterPatentModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="bg-[#0E162B] rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-[#C5A059]/60 relative my-8 text-slate-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div className="bg-[#0A0E17] rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-[0_0_30px_rgba(6,182,212,0.2)] border border-cyan-500/40 relative my-8 text-slate-200">
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-[#233257]">
+        <div className="flex items-start justify-between pb-4 border-b border-[#1E293B]">
           <div className="flex items-center space-x-3">
-            <div className="h-11 w-11 rounded-xl bg-[#881326]/60 border border-[#C5A059] flex items-center justify-center text-[#E5C158] shadow-burgundy-glow">
-              <Scroll className="h-6 w-6" />
+            <div className="h-11 w-11 rounded-xl bg-cyan-950/80 border border-cyan-500/60 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+              <Cpu className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="font-cinzel text-xl font-bold text-[#F5EFE0]">
-                Charter of Invention & Validity Bond
+              <h2 className="font-space text-lg font-bold uppercase tracking-wider text-slate-100">
+                Register Novelty Patent Dossier
               </h2>
-              <p className="text-xs font-cormorant italic text-[#C5A059]">
-                Petition for On-Chain Novelty Protection • High Tribunal of Patents
+              <p className="text-xs font-mono text-cyan-400">
+                GenLayer Studionet On-Chain Novelty Protection & Escrow
               </p>
             </div>
           </div>
@@ -92,10 +92,10 @@ export const RegisterPatentModal: React.FC<RegisterPatentModalProps> = ({
         </div>
 
         {/* Presets Bar */}
-        <div className="mt-4 p-3.5 bg-[#080C18] rounded-xl border border-[#C5A059]/30">
-          <div className="flex items-center space-x-1.5 text-xs font-cinzel font-bold text-[#E5C158] mb-2">
-            <Feather className="h-3.5 w-3.5" />
-            <span>Select Archival Formulation Preset (1-Click Fill):</span>
+        <div className="mt-4 p-3.5 bg-[#070A11] rounded-xl border border-cyan-500/20">
+          <div className="flex items-center space-x-1.5 text-xs font-space font-bold uppercase tracking-wider text-cyan-300 mb-2">
+            <Zap className="h-3.5 w-3.5 text-cyan-400" />
+            <span>Preset Research Formulations (1-Click Fill):</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {PRESET_PATENTS.map((preset, idx) => (
@@ -103,9 +103,9 @@ export const RegisterPatentModal: React.FC<RegisterPatentModalProps> = ({
                 key={idx}
                 type="button"
                 onClick={() => handleApplyPreset(preset)}
-                className="text-[11px] font-serif px-2.5 py-1 rounded-lg bg-[#121D38] border border-[#C5A059]/40 text-slate-200 hover:border-[#E5C158] hover:text-[#E5C158] transition-all text-left"
+                className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-[#0F1523] border border-cyan-500/30 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition-all text-left"
               >
-                {preset.title.slice(0, 34)}... ({preset.depositGen} GEN)
+                {preset.title.slice(0, 32)}... ({preset.depositGen} GEN)
               </button>
             ))}
           </div>
@@ -114,21 +114,21 @@ export const RegisterPatentModal: React.FC<RegisterPatentModalProps> = ({
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div>
-            <label className="block text-xs font-cinzel font-semibold text-[#C5A059] mb-1">
-              Title of the Claimed Invention
+            <label className="block text-xs font-space font-semibold uppercase tracking-wider text-cyan-300 mb-1">
+              Title of Claimed Research Invention
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Non-Euclidean Activation Manifold for Verifiable Inference"
-              className="w-full px-3.5 py-2.5 text-xs font-serif bg-[#080C18] border border-[#233257] rounded-xl text-amber-100 focus:outline-none focus:border-[#E5C158] focus:ring-1 focus:ring-[#E5C158]"
+              className="w-full px-3.5 py-2.5 text-xs font-mono bg-[#070A11] border border-[#1E293B] rounded-xl text-cyan-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(6,182,212,0.2)]"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-cinzel font-semibold text-[#C5A059] mb-1">
+            <label className="block text-xs font-space font-semibold uppercase tracking-wider text-cyan-300 mb-1">
               Novelty Specification & Mathematical Formulation
             </label>
             <textarea
@@ -136,17 +136,17 @@ export const RegisterPatentModal: React.FC<RegisterPatentModalProps> = ({
               value={claims}
               onChange={(e) => setClaims(e.target.value)}
               placeholder="Detail the core inventive step, formulas, and structural architecture distinguishing this patent from all known scientific prior art..."
-              className="w-full px-3.5 py-2.5 text-xs font-cormorant text-base bg-[#080C18] border border-[#233257] rounded-xl text-slate-200 focus:outline-none focus:border-[#E5C158] focus:ring-1 focus:ring-[#E5C158] leading-relaxed"
+              className="w-full px-3.5 py-2.5 text-xs font-mono bg-[#070A11] border border-[#1E293B] rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(6,182,212,0.2)] leading-relaxed"
               disabled={loading}
             />
-            <p className="text-[11px] font-cormorant italic text-slate-400 mt-1">
-              Minimum 20 characters. The GenLayer AI Examination Board will cross-examine these exact claims against all adversarial prior art.
+            <p className="text-[11px] font-mono text-slate-500 mt-1">
+              Minimum 20 characters. GenLayer AI Multi-Validator Examination will cross-examine these exact claims against prior art.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-cinzel font-semibold text-[#C5A059] mb-1">
+              <label className="block text-xs font-space font-semibold uppercase tracking-wider text-cyan-300 mb-1">
                 Validity Escrow Bond (GEN)
               </label>
               <input
@@ -156,17 +156,17 @@ export const RegisterPatentModal: React.FC<RegisterPatentModalProps> = ({
                 value={deposit}
                 onChange={(e) => setDeposit(e.target.value)}
                 placeholder="3.5"
-                className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-[#080C18] border border-[#233257] rounded-xl text-[#E5C158] focus:outline-none focus:border-[#E5C158]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-[#070A11] border border-[#1E293B] rounded-xl text-teal-300 focus:outline-none focus:border-cyan-400"
                 disabled={loading}
               />
-              <p className="text-[11px] font-cormorant italic text-slate-400 mt-1">
+              <p className="text-[11px] font-mono text-slate-500 mt-1">
                 Held in High Court Vault. Awarded to challenger if invalid; reclaimed if upheld.
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-cinzel font-semibold text-[#C5A059] mb-1">
-                Duration of Term (Blocks)
+              <label className="block text-xs font-space font-semibold uppercase tracking-wider text-cyan-300 mb-1">
+                Term Duration (Blocks)
               </label>
               <input
                 type="number"
@@ -174,40 +174,40 @@ export const RegisterPatentModal: React.FC<RegisterPatentModalProps> = ({
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
                 placeholder="500"
-                className="w-full px-3.5 py-2.5 text-xs font-mono bg-[#080C18] border border-[#233257] rounded-xl text-slate-200 focus:outline-none focus:border-[#E5C158]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono bg-[#070A11] border border-[#1E293B] rounded-xl text-slate-200 focus:outline-none focus:border-cyan-400"
                 disabled={loading}
               />
-              <p className="text-[11px] font-cormorant italic text-slate-400 mt-1">
+              <p className="text-[11px] font-mono text-slate-500 mt-1">
                 Window of blocks open to public prior art indictments.
               </p>
             </div>
           </div>
 
           {error && (
-            <div className="p-3 bg-rose-950/70 border border-rose-600 rounded-xl flex items-center space-x-2 text-xs text-rose-300">
+            <div className="p-3 bg-rose-950/70 border border-rose-600 rounded-xl flex items-center space-x-2 text-xs text-rose-300 font-mono">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#233257]">
+          <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#1E293B]">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-xs font-cinzel text-slate-400 hover:text-white transition-colors"
+              className="px-4 py-2 text-xs font-space uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center space-x-2 px-6 py-2.5 text-xs font-cinzel font-bold text-[#090E1F] bg-gradient-to-r from-[#FFF6D6] via-[#E5C158] to-[#C5A059] hover:from-white hover:to-[#E5C158] rounded-xl shadow-gold-glow transition-all disabled:opacity-50"
+              className="flex items-center space-x-2 px-6 py-2.5 text-xs font-space font-bold uppercase tracking-wider text-[#070A11] bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all disabled:opacity-50"
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin text-[#090E1F]" />
-                  <span>Enrolling Charter...</span>
+                  <Loader2 className="h-4 w-4 animate-spin text-[#070A11]" />
+                  <span>Enrolling Dossier...</span>
                 </>
               ) : (
                 <span>Seal Charter & Lock Escrow</span>

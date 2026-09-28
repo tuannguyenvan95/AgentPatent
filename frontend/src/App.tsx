@@ -75,23 +75,23 @@ export const App: React.FC = () => {
       });
       if (accounts && accounts[0]) {
         setUserAddress(accounts[0]);
-        showToast('success', `Admitted: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`);
+        showToast('success', `OPERATOR AUTHENTICATED: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`);
       }
     } catch (e: any) {
-      showToast('error', e?.message || 'Failed to authenticate advocate');
+      showToast('error', e?.message || 'Failed to authenticate wallet');
     }
   };
 
   const handleDisconnectWallet = () => {
     setUserAddress('');
     setUserBalance('0.00');
-    showToast('info', 'Counselor recused from Tribunal session');
+    showToast('info', 'Operator session terminated');
   };
 
   const handleSaveContractAddress = (newAddr: string) => {
     saveContractAddress(newAddr);
     setContractAddress(newAddr);
-    showToast('success', `Tribunal Rolls synchronized to ${newAddr.slice(0, 8)}...`);
+    showToast('success', `Intelligent Contract synchronized to ${newAddr.slice(0, 8)}...`);
   };
 
   const refreshData = useCallback(async () => {
@@ -328,8 +328,8 @@ export const App: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#080C18] flex flex-col font-sans text-slate-200 overflow-hidden">
-      {/* Supreme Tribunal Header */}
+    <div className="min-h-screen bg-[#070A11] flex flex-col font-sans text-slate-200 overflow-hidden">
+      {/* Cyber Forensic Telemetry Header */}
       <Navbar
         userAddress={userAddress}
         userBalance={userBalance}
@@ -342,18 +342,18 @@ export const App: React.FC = () => {
 
       {/* Global Notification Toast */}
       {notification && (
-        <div className="fixed top-24 right-6 z-50 max-w-md w-full animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="fixed top-20 right-6 z-50 max-w-md w-full animate-in fade-in slide-in-from-top-4 duration-300">
           <div
-            className={`p-4 rounded-2xl shadow-2xl border text-xs font-serif flex items-center justify-between ${
+            className={`p-4 rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.8)] border text-xs font-mono flex items-center justify-between ${
               notification.type === 'success'
-                ? 'bg-emerald-950/90 text-emerald-200 border-emerald-500/70 shadow-lg'
+                ? 'bg-[#0A161E]/95 text-teal-200 border-teal-500/80 shadow-[0_0_15px_rgba(20,184,166,0.3)]'
                 : notification.type === 'error'
-                ? 'bg-rose-950/90 text-rose-200 border-rose-600/70 shadow-burgundy-glow'
-                : 'bg-[#121D38] text-amber-200 border-[#C5A059]/60 shadow-gold-glow'
+                ? 'bg-[#1F0A10]/95 text-rose-200 border-rose-500/80 shadow-[0_0_15px_rgba(244,63,94,0.3)]'
+                : 'bg-[#0F1523]/95 text-cyan-200 border-cyan-500/80 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
             }`}
           >
             <div className="flex items-center space-x-2.5">
-              <AlertCircle className="h-4 w-4 flex-shrink-0 text-[#E5C158]" />
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-cyan-400" />
               <span>{notification.text}</span>
             </div>
             <button

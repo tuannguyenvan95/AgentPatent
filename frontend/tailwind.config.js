@@ -7,38 +7,48 @@ export default {
   theme: {
     extend: {
       colors: {
-        court: {
-          bg: '#080C18',          // Deepest Imperial Midnight
-          panel: '#0E162B',       // Velvet Navy Dossier Panel
-          card: '#121D38',        // Sovereign Blue Parchment Base
-          border: '#233257',      // Midnight Slate Border
-          goldBorder: '#C5A059',  // Burnished Antique Gold
-          gold: '#E5C158',        // Regal Gold Accent
-          goldMuted: '#9A7B38',   // Aged Brass
-          parchment: '#F5EFE0',   // Antique Document Parchment
-          parchmentDark: '#1E2C4F',// Deep Indigo Dossier
-          burgundy: '#881326',    // Imperial Crimson Seal
-          burgundyDark: '#500B17',// Deep Velvet Claret
-          burgundyLight: '#A31B32',// Bright Velvet Red
-          emerald: '#155E38',     // Decree Valid Green
-          emeraldLight: '#228B52',// Bright Novelty Green
-          amber: '#B45309',       // Hearing Yellow/Amber
-          amberLight: '#D97706',
+        cyber: {
+          bg: '#070A11',         // Deep Graphite Void
+          panel: '#0A0E17',      // Primary Station Panel
+          card: '#0F1523',       // Tactical Card Surface
+          cardHover: '#141C2E',
+          border: '#1A2338',     // Subtle Circuit Border
+          borderBright: '#2A3B5C',
+          cyan: '#06B6D4',       // Holographic Telemetry
+          cyanGlow: '#22D3EE',
+          teal: '#14B8A6',       // Verified Novelty
+          tealGlow: '#2DD4BF',
+          emerald: '#10B981',
+          crimson: '#F43F5E',    // Prior Art Collision Alert
+          crimsonGlow: '#FB7185',
+          amber: '#F59E0B',      // Inquest / Sub Judice
+          purple: '#A855F7',     // Safety Escalation
+          textDim: '#64748B',
           textMuted: '#94A3B8',
-          textLight: '#E2E8F0',
+          textBright: '#F1F5F9',
         }
       },
       fontFamily: {
-        decorative: ['"Cinzel Decorative"', 'Cinzel', 'serif'],
-        cinzel: ['Cinzel', 'Georgia', 'serif'],
-        cormorant: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        display: ['"Space Grotesk"', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'Courier Prime', 'monospace'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
-        'gold-glow': '0 0 20px -3px rgba(197, 160, 89, 0.25)',
-        'burgundy-glow': '0 0 20px -3px rgba(136, 19, 38, 0.35)',
-        'court-panel': '0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(197, 160, 89, 0.2)',
+        'cyan-glow': '0 0 25px -4px rgba(6, 182, 212, 0.35)',
+        'teal-glow': '0 0 25px -4px rgba(20, 184, 166, 0.35)',
+        'crimson-glow': '0 0 25px -4px rgba(244, 63, 94, 0.35)',
+        'amber-glow': '0 0 25px -4px rgba(245, 158, 11, 0.35)',
+        'panel-border': '0 0 0 1px rgba(26, 35, 56, 1), 0 8px 30px -8px rgba(0, 0, 0, 0.7)',
+      },
+      animation: {
+        'radar-sweep': 'sweep 4s linear infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        sweep: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        }
       }
     },
   },

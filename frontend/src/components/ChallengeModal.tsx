@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Flame, AlertCircle, Loader2, Sparkles, Scale, ExternalLink } from 'lucide-react';
+import { X, AlertCircle, Loader2, Sparkles, Scale, ExternalLink, ShieldAlert, Crosshair } from 'lucide-react';
 import { PatentCaseData } from '../config/genlayer';
 import { formatGen, PRESET_PRIOR_ART } from '../utils/helpers';
 
@@ -59,20 +59,20 @@ export const ChallengeModal: React.FC<ChallengeModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="bg-[#0E162B] rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-rose-600/60 relative my-8 text-slate-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div className="bg-[#0A0E17] rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-[0_0_30px_rgba(244,63,94,0.2)] border border-rose-500/50 relative my-8 text-slate-200">
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-[#233257]">
+        <div className="flex items-start justify-between pb-4 border-b border-[#1E293B]">
           <div className="flex items-center space-x-3">
-            <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-[#881326] to-[#450A13] border border-[#C5A059] flex items-center justify-center text-rose-300 shadow-burgundy-glow">
-              <Scale className="h-6 w-6 text-[#E5C158]" />
+            <div className="h-11 w-11 rounded-xl bg-rose-950/80 border border-rose-500/60 flex items-center justify-center text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.25)]">
+              <ShieldAlert className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="font-cinzel text-xl font-bold text-rose-200">
-                Bill of Indictment: Prior Art Collision
+              <h2 className="font-space text-lg font-bold uppercase tracking-wider text-rose-200">
+                File Prior Art Collision Audit
               </h2>
-              <p className="text-xs font-cormorant italic text-slate-400">
-                Docket #{patent.patent_id} • Challenge to Novelty & Non-Obviousness
+              <p className="text-xs font-mono text-slate-400">
+                Dossier #{patent.patent_id} • AI Non-Obviousness & Novelty Challenge
               </p>
             </div>
           </div>
@@ -86,18 +86,18 @@ export const ChallengeModal: React.FC<ChallengeModalProps> = ({
         </div>
 
         {/* Challenged Patent Summary */}
-        <div className="mt-4 p-4 bg-[#080C18] rounded-xl border border-[#233257] text-xs space-y-2">
+        <div className="mt-4 p-4 bg-[#070A11] rounded-xl border border-[#1E293B] text-xs font-mono space-y-2">
           <div className="flex justify-between">
-            <span className="font-cinzel text-slate-400">Patent Validity Bond at Stake:</span>
-            <span className="font-mono font-bold text-[#E5C158]">{formatGen(patent.escrow_deposit)} GEN</span>
+            <span className="text-slate-400">Patent Validity Bond at Stake:</span>
+            <span className="font-bold text-teal-300">{formatGen(patent.escrow_deposit)} GEN</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-cinzel text-slate-400">Required Challenger Bond:</span>
-            <span className="font-mono font-bold text-rose-400">Min {minBondGen} GEN (10%)</span>
+            <span className="text-slate-400">Required Challenger Anti-Griefing Bond:</span>
+            <span className="font-bold text-rose-400">Min {minBondGen} GEN (10%)</span>
           </div>
-          <div className="pt-2 border-t border-[#233257]">
-            <p className="font-cinzel text-slate-400 mb-1">Target Claim Under Indictment:</p>
-            <p className="italic font-cormorant text-slate-200 bg-[#121D38] p-2.5 rounded-lg border border-[#233257] text-sm leading-relaxed">
+          <div className="pt-2 border-t border-[#1E293B]">
+            <p className="text-slate-400 mb-1 text-[11px]">// TARGET SPECIFICATION UNDER AUDIT:</p>
+            <p className="text-slate-300 bg-[#0F1523] p-2.5 rounded-lg border border-[#1E293B] text-xs leading-relaxed">
               "{patent.novelty_claims}"
             </p>
           </div>
@@ -105,9 +105,9 @@ export const ChallengeModal: React.FC<ChallengeModalProps> = ({
 
         {/* Quick Presets */}
         <div className="mt-4">
-          <div className="flex items-center space-x-1.5 text-xs font-cinzel font-bold text-amber-200 mb-2">
-            <Sparkles className="h-3.5 w-3.5 text-[#E5C158]" />
-            <span>Exemplary Prior Art Publications (arXiv / Whitepapers):</span>
+          <div className="flex items-center space-x-1.5 text-xs font-space font-bold uppercase tracking-wider text-cyan-300 mb-2">
+            <Crosshair className="h-3.5 w-3.5 text-cyan-400" />
+            <span>Exemplary Prior Art Literature (arXiv / Whitepapers):</span>
           </div>
           <div className="space-y-1.5">
             {PRESET_PRIOR_ART.map((preset, idx) => (
@@ -115,18 +115,18 @@ export const ChallengeModal: React.FC<ChallengeModalProps> = ({
                 key={idx}
                 type="button"
                 onClick={() => handleApplyPreset(preset.url)}
-                className="w-full text-left p-2.5 rounded-xl bg-[#080C18] border border-[#233257] hover:border-rose-500/60 hover:bg-[#881326]/20 transition-all flex items-center justify-between group"
+                className="w-full text-left p-2.5 rounded-xl bg-[#070A11] border border-[#1E293B] hover:border-rose-500/60 hover:bg-rose-950/20 transition-all flex items-center justify-between group"
               >
                 <div>
-                  <p className="text-xs font-cinzel font-semibold text-slate-200 group-hover:text-amber-200">
+                  <p className="text-xs font-space font-semibold text-slate-200 group-hover:text-cyan-300">
                     {preset.title}
                   </p>
-                  <p className="text-[11px] font-cormorant italic text-slate-400 truncate max-w-md">
+                  <p className="text-[11px] font-mono text-slate-500 truncate max-w-md">
                     {preset.desc}
                   </p>
                 </div>
-                <span className="text-[10px] font-cinzel font-bold text-rose-300 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-600/40">
-                  Cite
+                <span className="text-[10px] font-mono font-bold text-rose-300 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-600/40">
+                  CITE
                 </span>
               </button>
             ))}
@@ -136,24 +136,24 @@ export const ChallengeModal: React.FC<ChallengeModalProps> = ({
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div>
-            <label className="block text-xs font-cinzel font-semibold text-[#C5A059] mb-1">
-              Public Prior Art Evidence URL (arXiv / Patent / Document)
+            <label className="block text-xs font-space font-semibold uppercase tracking-wider text-cyan-300 mb-1">
+              Public Prior Art Evidence URL (arXiv / Raw Text / Paper)
             </label>
             <input
               type="url"
               value={priorArtUrl}
               onChange={(e) => setPriorArtUrl(e.target.value)}
               placeholder="https://raw.githubusercontent.com/.../paper.txt or https://arxiv.org/..."
-              className="w-full px-3.5 py-2.5 text-xs font-mono bg-[#080C18] border border-[#233257] rounded-xl text-slate-200 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+              className="w-full px-3.5 py-2.5 text-xs font-mono bg-[#070A11] border border-[#1E293B] rounded-xl text-slate-200 focus:outline-none focus:border-rose-500 focus:shadow-[0_0_10px_rgba(244,63,94,0.2)]"
               disabled={loading}
             />
-            <p className="text-[11px] font-cormorant italic text-slate-400 mt-1">
-              The Intelligent Contract will inspect this publication live via <code className="text-[#E5C158]">gl.nondet.web.render</code>.
+            <p className="text-[11px] font-mono text-slate-500 mt-1">
+              The contract inspects this publication live via <code className="text-cyan-300">gl.nondet.web.render</code>.
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-cinzel font-semibold text-[#C5A059] mb-1">
+            <label className="block text-xs font-space font-semibold uppercase tracking-wider text-cyan-300 mb-1">
               Staked Anti-Griefing Bond (GEN)
             </label>
             <input
@@ -162,34 +162,34 @@ export const ChallengeModal: React.FC<ChallengeModalProps> = ({
               min={minBondGen}
               value={bond}
               onChange={(e) => setBond(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-[#080C18] border border-[#233257] rounded-xl text-rose-400 focus:outline-none focus:border-rose-500"
+              className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-[#070A11] border border-[#1E293B] rounded-xl text-rose-400 focus:outline-none focus:border-rose-500"
               disabled={loading}
             />
-            <p className="text-[11px] font-cormorant italic text-slate-400 mt-1">
+            <p className="text-[11px] font-mono text-slate-500 mt-1">
               Refunded + 100% of patent escrow if collision is confirmed. Forfeited to inventor if claims are upheld.
             </p>
           </div>
 
           {error && (
-            <div className="p-3 bg-rose-950/70 border border-rose-600 rounded-xl flex items-center space-x-2 text-xs text-rose-300">
+            <div className="p-3 bg-rose-950/70 border border-rose-600 rounded-xl flex items-center space-x-2 text-xs text-rose-300 font-mono">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#233257]">
+          <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#1E293B]">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-xs font-cinzel text-slate-400 hover:text-white transition-colors"
+              className="px-4 py-2 text-xs font-space uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center space-x-2 px-6 py-2.5 text-xs font-cinzel font-bold text-white bg-[#881326] hover:bg-[#A31B32] border border-[#C5A059]/60 rounded-xl shadow-burgundy-glow transition-all disabled:opacity-50"
+              className="flex items-center space-x-2 px-6 py-2.5 text-xs font-space font-bold uppercase tracking-wider text-white bg-rose-950/80 hover:bg-rose-900 border border-rose-500 rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -197,7 +197,7 @@ export const ChallengeModal: React.FC<ChallengeModalProps> = ({
                   <span>Staking Indictment...</span>
                 </>
               ) : (
-                <span>Stake Bond & File Indictment</span>
+                <span>Stake Bond & File Collision Indictment</span>
               )}
             </button>
           </div>

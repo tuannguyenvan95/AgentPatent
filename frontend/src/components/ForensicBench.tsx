@@ -10,10 +10,15 @@ import {
   AlertTriangle,
   Clock,
   Coins,
-  Scroll,
   Cpu,
   Gavel,
   Zap,
+  Terminal,
+  Crosshair,
+  Radio,
+  FileCode,
+  ShieldAlert,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { PatentCaseData } from '../config/genlayer';
 import { formatGen, truncateAddress, getStatusMeta } from '../utils/helpers';
@@ -33,15 +38,18 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
 }) => {
   if (!patent) {
     return (
-      <main className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#080C18] h-[calc(100vh-5.5rem)]">
-        <div className="h-20 w-20 rounded-2xl bg-[#0E1529] border border-[#C5A059]/40 flex items-center justify-center text-[#E5C158] mb-4 shadow-court-panel">
-          <Scale className="h-10 w-10 opacity-70" />
+      <main className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#070A11] h-[calc(100vh-4.5rem)] relative overflow-hidden">
+        {/* Radar Background grid decoration */}
+        <div className="absolute inset-0 bg-cyber-grid bg-[size:30px_30px] opacity-15 pointer-events-none" />
+        <div className="h-20 w-20 rounded-2xl bg-[#0A0E17] border border-cyan-500/40 flex items-center justify-center text-cyan-400 mb-4 shadow-[0_0_25px_rgba(6,182,212,0.25)] relative">
+          <div className="absolute inset-0 rounded-2xl border border-cyan-400/20 animate-ping" />
+          <Crosshair className="h-10 w-10 opacity-80" />
         </div>
-        <h3 className="font-cinzel text-xl font-bold text-[#F5EFE0]">
-          Select an Archival Docket from the Left Registry
+        <h3 className="font-space text-lg font-bold text-slate-100 uppercase tracking-wider">
+          AWAITING DOSSIER SELECTION // RADAR STANDBY
         </h3>
-        <p className="text-sm font-cormorant italic text-slate-400 max-w-md mt-2">
-          Click any patent case file in the left filing cabinet to summon the dual-chamber forensic collision analyzer.
+        <p className="text-xs font-mono text-slate-400 max-w-md mt-2">
+          Select an active patent dossier from the left archive matrix to engage the dual-chamber AI collision forensic analyzer.
         </p>
       </main>
     );
@@ -59,33 +67,39 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
   const strokeDashoffset = circumference - (patent.overlap_score / 100) * circumference;
 
   return (
-    <main className="flex-1 flex flex-col bg-[#080C18] h-[calc(100vh-5.5rem)] overflow-y-auto">
+    <main className="flex-1 flex flex-col bg-[#070A11] h-[calc(100vh-4.5rem)] overflow-y-auto relative">
+      {/* Background Cyber Grid */}
+      <div className="absolute inset-0 bg-cyber-grid bg-[size:36px_36px] opacity-15 pointer-events-none" />
+
       {/* Upper HUD: Judicial Collision Radar & Case Overview */}
-      <section className="p-6 border-b border-[#233257] bg-gradient-to-r from-[#0B1020] via-[#0E1529] to-[#0B1020] relative">
+      <section className="p-6 border-b border-[#1E293B] bg-gradient-to-r from-[#0A0E17] via-[#0F1523] to-[#0A0E17] relative z-10">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           {/* Case Identity */}
-          <div className="space-y-1.5 max-w-2xl">
+          <div className="space-y-2 max-w-2xl">
             <div className="flex items-center space-x-2">
-              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#080C18] text-[#E5C158] border border-[#C5A059]/40">
-                CASE DOCKET #{patent.patent_id}
+              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#070A11] text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]">
+                CASE DOSSIER #{patent.patent_id}
               </span>
-              <span className={`text-[10px] font-cinzel font-bold px-2.5 py-0.5 rounded-full border ${statusMeta.badgeBg}`}>
+              <span
+                className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded border flex items-center gap-1.5 ${statusMeta.badgeBg}`}
+              >
+                <span className="h-2 w-2 rounded-full bg-current animate-pulse" />
                 {statusMeta.label}
               </span>
-              <span className="text-xs font-cormorant italic text-[#C5A059]">
-                ({statusMeta.latinMotto})
+              <span className="text-xs font-mono text-cyan-400/80">
+                [{statusMeta.latinMotto}]
               </span>
             </div>
-            <h1 className="font-cinzel text-xl sm:text-2xl font-black text-[#F5EFE0] tracking-tight">
+            <h1 className="font-space text-xl sm:text-2xl font-black text-slate-100 tracking-tight">
               {patent.patent_title}
             </h1>
-            <p className="text-xs font-serif text-slate-400">
-              Enrolled at Block <code className="text-[#E5C158]">#{patent.created_at_block}</code> • Bound by Sovereign Escrow <strong className="text-[#E5C158]">{formatGen(patent.escrow_deposit)} GEN</strong>
+            <p className="text-xs font-mono text-slate-400">
+              Anchored Block <code className="text-cyan-300 font-bold">#{patent.created_at_block}</code> • Escrow Vault Stake: <strong className="text-teal-300">{formatGen(patent.escrow_deposit)} GEN</strong>
             </p>
           </div>
 
           {/* Circular Collision Radar & Bench Diagnostics */}
-          <div className="flex items-center space-x-4 bg-[#080C18]/90 p-3 rounded-2xl border border-[#C5A059]/30 shadow-court-panel">
+          <div className="flex items-center space-x-5 bg-[#0A0E17]/95 p-3.5 rounded-2xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)] relative">
             {/* SVG Circular Equivalence Gauge */}
             <div className="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
@@ -94,15 +108,15 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
                   cy="50"
                   r={radius}
                   stroke="#1E293B"
-                  strokeWidth="8"
+                  strokeWidth="7"
                   fill="transparent"
                 />
                 <circle
                   cx="50"
                   cy="50"
                   r={radius}
-                  stroke={patent.overlap_score >= 75 ? '#F43F5E' : patent.overlap_score > 0 ? '#10B981' : '#64748B'}
-                  strokeWidth="8"
+                  stroke={patent.overlap_score >= 75 ? '#F43F5E' : patent.overlap_score > 0 ? '#14B8A6' : '#64748B'}
+                  strokeWidth="7"
                   strokeDasharray={circumference}
                   strokeDashoffset={strokeDashoffset}
                   strokeLinecap="round"
@@ -111,31 +125,51 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className={`font-mono text-base font-black ${patent.overlap_score >= 75 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                <span
+                  className={`font-mono text-base font-black ${
+                    patent.overlap_score >= 75
+                      ? 'text-rose-400'
+                      : patent.overlap_score > 0
+                      ? 'text-teal-400'
+                      : 'text-slate-400'
+                  }`}
+                >
                   {patent.overlap_score}%
                 </span>
-                <span className="text-[8px] font-cinzel font-bold text-slate-400 uppercase tracking-tighter">
-                  Collision
+                <span className="text-[8px] font-space font-bold text-slate-400 uppercase tracking-tighter">
+                  COLLISION
                 </span>
               </div>
             </div>
 
             {/* Metric Readouts */}
-            <div className="space-y-1 text-xs font-mono">
+            <div className="space-y-1.5 text-xs font-mono">
               <div className="flex justify-between gap-4">
-                <span className="text-slate-400 font-serif text-[11px]">Consensus:</span>
-                <span className="font-bold text-[#E5C158]">{patent.confidence}% Concord</span>
+                <span className="text-slate-400 text-[11px]">Consensus:</span>
+                <span className="font-bold text-cyan-300">{patent.confidence}% Concord</span>
               </div>
               <div className="flex justify-between gap-4">
-                <span className="text-slate-400 font-serif text-[11px]">Anticipation:</span>
-                <span className={`font-bold ${patent.overlap_score >= 75 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                  {patent.overlap_score >= 75 ? 'CRITICAL (≥75%)' : 'DISTINCT (<75%)'}
+                <span className="text-slate-400 text-[11px]">Status Matrix:</span>
+                <span
+                  className={`font-bold ${
+                    patent.overlap_score >= 75
+                      ? 'text-rose-400'
+                      : patent.overlap_score > 0
+                      ? 'text-teal-400'
+                      : 'text-slate-400'
+                  }`}
+                >
+                  {patent.overlap_score >= 75
+                    ? 'COLLISION CRITICAL (≥75%)'
+                    : patent.overlap_score > 0
+                    ? 'NOVEL DISTINCT (<75%)'
+                    : 'UNCONTESTED'}
                 </span>
               </div>
               <div className="flex justify-between gap-4">
-                <span className="text-slate-400 font-serif text-[11px]">Timelock:</span>
+                <span className="text-slate-400 text-[11px]">Timelock Cooling:</span>
                 <span className="font-bold text-indigo-300">
-                  {patent.status === 2 ? '24 BLOCKS' : 'CLOSED'}
+                  {patent.status === 2 ? '24 BLOCKS ACTIVE' : 'LOCKED / DORMANT'}
                 </span>
               </div>
             </div>
@@ -144,91 +178,92 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
       </section>
 
       {/* Center Stage: The Dual-Chamber Side-by-Side Comparison Arena */}
-      <section className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
+      <section className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
         {/* Left Chamber: Invention Charter & Novelty Claims (Chamber A) */}
-        <div className="bg-[#0E1529] rounded-2xl p-5 border border-[#233257] shadow-court-panel flex flex-col">
-          <div className="flex items-center justify-between pb-3 border-b border-[#233257] mb-3">
-            <div className="flex items-center space-x-2">
-              <div className="h-7 w-7 rounded-lg bg-[#881326]/50 border border-[#C5A059] flex items-center justify-center text-[#E5C158]">
-                <Scroll className="h-4 w-4" />
+        <div className="bg-[#0A0E17]/90 rounded-2xl p-5 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.1)] flex flex-col relative">
+          <div className="flex items-center justify-between pb-3 border-b border-[#1E293B] mb-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="h-7 w-7 rounded-lg bg-cyan-950/80 border border-cyan-500/60 flex items-center justify-center text-cyan-300">
+                <FileCode className="h-4 w-4" />
               </div>
               <div>
-                <h3 className="font-cinzel text-xs font-bold text-[#F5EFE0]">
-                  CHAMBER A: INVENTION CHARTER
+                <h3 className="font-space text-xs font-bold text-cyan-300 uppercase tracking-wider">
+                  CHAMBER A // INVENTOR CLAIMS
                 </h3>
-                <p className="text-[10px] font-cormorant italic text-[#C5A059]">
-                  Inventor Claims Specification
+                <p className="text-[10px] font-mono text-slate-400">
+                  Primary Novelty Formulation & Algorithms
                 </p>
               </div>
             </div>
-            <span className="font-mono text-[10px] text-slate-400">
-              By: {truncateAddress(patent.inventor)}
+            <span className="font-mono text-[10px] text-cyan-400/70">
+              Lead: {truncateAddress(patent.inventor)}
             </span>
           </div>
 
           {/* Formatted Legal Claims Box */}
-          <div className="flex-1 bg-[#080C18] p-4 rounded-xl border border-[#233257] font-cormorant text-slate-200 text-sm leading-relaxed space-y-2">
-            <div className="text-[10px] font-mono text-[#C5A059] uppercase tracking-wider pb-1 border-b border-slate-800">
-              § 1. CLAIMS & MATHEMATICAL FORMULATION
+          <div className="flex-1 bg-[#070A11] p-4 rounded-xl border border-[#1E293B] font-mono text-slate-200 text-xs leading-relaxed space-y-2">
+            <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider pb-1 border-b border-[#1E293B] flex items-center justify-between">
+              <span>// SPECIFICATION FORMULATION</span>
+              <span className="text-slate-500">SHA-256 VERIFIED</span>
             </div>
-            <p className="italic text-base text-amber-100/90 leading-relaxed font-serif">
+            <p className="text-cyan-100/90 leading-relaxed font-mono whitespace-pre-wrap">
               "{patent.novelty_claims}"
             </p>
           </div>
 
-          <div className="mt-3 pt-2 flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span>Escrow Bond: <strong className="text-[#E5C158]">{formatGen(patent.escrow_deposit)} GEN</strong></span>
-            <span>Term Limit: Block #{patent.expires_at_block}</span>
+          <div className="mt-3 pt-2 flex items-center justify-between text-[11px] font-mono text-slate-400 border-t border-[#1E293B]">
+            <span>Escrow Stake: <strong className="text-teal-300">{formatGen(patent.escrow_deposit)} GEN</strong></span>
+            <span>Expiry Block: <strong className="text-cyan-300">#{patent.expires_at_block}</strong></span>
           </div>
         </div>
 
         {/* Right Chamber: Prior Art Evidence & Technical Counter-Document (Chamber B) */}
-        <div className="bg-[#0E1529] rounded-2xl p-5 border border-[#233257] shadow-court-panel flex flex-col">
-          <div className="flex items-center justify-between pb-3 border-b border-[#233257] mb-3">
-            <div className="flex items-center space-x-2">
-              <div className="h-7 w-7 rounded-lg bg-rose-950/60 border border-rose-500/60 flex items-center justify-center text-rose-300">
-                <Scale className="h-4 w-4" />
+        <div className="bg-[#0A0E17]/90 rounded-2xl p-5 border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)] flex flex-col relative">
+          <div className="flex items-center justify-between pb-3 border-b border-[#1E293B] mb-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="h-7 w-7 rounded-lg bg-rose-950/80 border border-rose-500/60 flex items-center justify-center text-rose-300">
+                <ShieldAlert className="h-4 w-4" />
               </div>
               <div>
-                <h3 className="font-cinzel text-xs font-bold text-rose-200">
-                  CHAMBER B: ADDUCED PRIOR ART
+                <h3 className="font-space text-xs font-bold text-rose-300 uppercase tracking-wider">
+                  CHAMBER B // ADDUCED PRIOR ART
                 </h3>
-                <p className="text-[10px] font-cormorant italic text-slate-400">
-                  Adversary Counter-Evidence
+                <p className="text-[10px] font-mono text-slate-400">
+                  Adversary Counter-Evidence & Literature
                 </p>
               </div>
             </div>
-            <span className="font-mono text-[10px] text-slate-400">
+            <span className="font-mono text-[10px] text-rose-400/70">
               Challenger: {truncateAddress(patent.challenger)}
             </span>
           </div>
 
           {/* If prior art URL exists */}
           {hasPriorArt ? (
-            <div className="flex-1 bg-[#080C18] p-4 rounded-xl border border-[#233257] space-y-3 flex flex-col">
+            <div className="flex-1 bg-[#070A11] p-4 rounded-xl border border-[#1E293B] space-y-3 flex flex-col">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-cinzel font-bold text-rose-300">
+                <span className="text-[10px] font-space font-bold uppercase tracking-wider text-rose-400">
                   PUBLIC EVIDENCE ARTIFACT
                 </span>
                 <a
                   href={patent.prior_art_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-serif text-[#E5C158] hover:underline inline-flex items-center gap-1 font-semibold"
+                  className="text-xs font-mono text-cyan-300 hover:text-cyan-200 inline-flex items-center gap-1 font-semibold"
                 >
                   <span>Open Primary Source</span>
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-[#121D38] border border-[#233257] font-mono text-[11px] text-slate-300 break-all">
+              <div className="p-2.5 rounded-lg bg-[#0F1523] border border-[#1E293B] font-mono text-[11px] text-cyan-100 break-all">
                 {patent.prior_art_url}
               </div>
 
               {patent.evidence_hash && (
-                <div className="p-2 rounded-lg bg-[#0E162B] border border-[#C5A059]/30 text-[11px] font-mono flex items-center gap-2">
-                  <Fingerprint className="h-4 w-4 text-[#E5C158] flex-shrink-0" />
-                  <span className="text-[#C5A059] font-bold">SHA-256 Seal:</span>
+                <div className="p-2 rounded-lg bg-[#0A0E17] border border-cyan-500/30 text-[11px] font-mono flex items-center gap-2">
+                  <Fingerprint className="h-4 w-4 text-cyan-400 flex-shrink-0" />
+                  <span className="text-cyan-400 font-bold">SHA-256 Digest:</span>
                   <span className="text-slate-300 truncate" title={patent.evidence_hash}>
                     {patent.evidence_hash}
                   </span>
@@ -237,50 +272,59 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
 
               {/* Inquest notice if pending */}
               {isPending && (
-                <div className="mt-auto p-3 rounded-lg bg-amber-950/40 border border-amber-600/50 text-center text-xs">
-                  <p className="text-amber-200 font-cinzel font-bold mb-1">
-                    Indictment Filed • AI Bench Convening
+                <div className="mt-auto p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/50 text-center text-xs">
+                  <p className="text-amber-300 font-space font-bold uppercase tracking-wider mb-2 flex items-center justify-center gap-1.5">
+                    <Radio className="h-3.5 w-3.5 animate-pulse text-amber-400" />
+                    Challenge Recorded • AI Multi-Validator Deliberation Ready
                   </p>
                   <button
                     onClick={() => onAdjudicate(patent.patent_id)}
                     disabled={actionLoading}
-                    className="mt-1 px-4 py-1.5 rounded-lg text-xs font-cinzel font-bold text-[#090E1F] bg-gradient-to-r from-[#E5C158] to-[#C5A059] shadow-gold-glow"
+                    className="w-full py-2 px-3 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-[#070A11] bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all"
                   >
-                    Trigger GenLayer AI Scraping & Deliberation
+                    Run GenLayer Web Scrape & Consensus Engine
                   </button>
                 </div>
               )}
             </div>
           ) : (
             /* No challenge filed yet */
-            <div className="flex-1 bg-[#080C18] p-6 rounded-xl border border-dashed border-[#233257] flex flex-col items-center justify-center text-center">
-              <Shield className="h-10 w-10 text-emerald-500 mb-2 opacity-70" />
-              <h4 className="font-cinzel text-sm font-bold text-[#F5EFE0]">
-                No Prior Art Indictment Filed Yet
+            <div className="flex-1 bg-[#070A11] p-6 rounded-xl border border-dashed border-[#1E293B] flex flex-col items-center justify-center text-center">
+              <Shield className="h-10 w-10 text-teal-400 mb-2 opacity-80" />
+              <h4 className="font-space text-sm font-bold text-slate-100 uppercase tracking-wider">
+                NO PRIOR ART COLLISION FILED
               </h4>
-              <p className="text-xs font-cormorant italic text-slate-400 mt-1 max-w-xs">
-                This patent claim remains unassailed in the High Court Rolls. Any researcher or AI Agent may file an indictment by staking a 10% bond.
+              <p className="text-xs font-mono text-slate-400 mt-1 max-w-xs">
+                This patent claim remains uncontested in the GenLayer High Court Rolls. Any researcher or AI Agent may challenge by staking a 10% bond.
               </p>
               <button
                 onClick={() => onOpenChallenge(patent)}
-                className="mt-4 px-4 py-2 rounded-xl text-xs font-cinzel font-bold text-white bg-[#881326] hover:bg-[#A31B32] border border-[#C5A059]/60 shadow-burgundy-glow"
+                className="mt-4 px-4 py-2 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-white bg-rose-950/80 hover:bg-rose-900 border border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all"
               >
-                Stake Bond & File Collision Indictment
+                Stake Bond & File Collision Audit
               </button>
             </div>
           )}
 
-          <div className="mt-3 pt-2 flex items-center justify-between text-[11px] font-mono text-slate-400">
+          <div className="mt-3 pt-2 flex items-center justify-between text-[11px] font-mono text-slate-400 border-t border-[#1E293B]">
             <span>Challenger Bond: <strong className="text-rose-400">{formatGen(patent.challenger_bond)} GEN</strong></span>
-            <span>Status: {statusMeta.label}</span>
+            <span>Docket Status: <span className="text-cyan-400">{statusMeta.label}</span></span>
           </div>
         </div>
       </section>
 
       {/* Lower Bench: Official AI Forensic Rationale & Decree */}
       {patent.verdict && patent.verdict !== 'PENDING' && (
-        <section className="p-6 pt-0">
-          <div className={`rounded-2xl p-6 border shadow-court-panel ${isInvalidated ? 'bg-rose-950/30 border-rose-600/60' : isUpheld ? 'bg-teal-950/30 border-teal-600/60' : 'bg-purple-950/30 border-purple-600/60'}`}>
+        <section className="p-6 pt-0 relative z-10">
+          <div
+            className={`rounded-2xl p-5 border ${
+              isInvalidated
+                ? 'bg-rose-950/20 border-rose-500/50 shadow-[0_0_20px_rgba(244,63,94,0.15)]'
+                : isUpheld
+                ? 'bg-teal-950/20 border-teal-500/50 shadow-[0_0_20px_rgba(20,184,166,0.15)]'
+                : 'bg-purple-950/20 border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.15)]'
+            }`}
+          >
             <div className="flex items-center space-x-2.5 mb-3">
               {isInvalidated ? (
                 <AlertOctagon className="h-6 w-6 text-rose-400" />
@@ -289,20 +333,23 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
               ) : (
                 <AlertTriangle className="h-6 w-6 text-purple-400" />
               )}
-              <h3 className="font-cinzel text-base font-bold text-amber-100 uppercase tracking-wider">
-                Official Bench Verdict: {patent.verdict.replace('_', ' ')}
+              <h3 className="font-space text-sm font-bold text-slate-100 uppercase tracking-wider">
+                GENVM AI MULTI-VALIDATOR FORENSIC RATIONALE // {patent.verdict}
               </h3>
             </div>
 
-            <div className="bg-[#080C18]/80 p-4 rounded-xl border border-[#233257] font-cormorant text-base text-slate-200 leading-relaxed italic">
+            <div className="bg-[#070A11] p-4 rounded-xl border border-[#1E293B] font-mono text-xs text-cyan-100/90 leading-relaxed">
+              <span className="text-slate-500 block text-[10px] mb-1 pb-1 border-b border-[#1E293B]">
+                // CONSENSUS DECREE CITATION
+              </span>
               "{patent.reason}"
             </div>
 
             {/* Cooling-off / Dispute status banner */}
             {patent.status === 2 && (
-              <div className="mt-3 p-3 bg-indigo-950/60 border border-indigo-500/60 rounded-xl text-xs text-indigo-200 flex items-center justify-between">
-                <span className="font-serif">
-                  ⚖️ <strong>24-Block Cooling-Off Timelock Active:</strong> Appeal window closes at Block #{patent.payout_ready_at_block}.
+              <div className="mt-3 p-3 bg-indigo-950/40 border border-indigo-500/50 rounded-xl text-xs text-indigo-200 flex items-center justify-between font-mono">
+                <span>
+                  ⚖️ <strong>24-BLOCK COOLING-OFF TIMELOCK ACTIVE:</strong> Dispute window closes at Block #{patent.payout_ready_at_block}.
                 </span>
               </div>
             )}
