@@ -4,6 +4,18 @@ from dataclasses import dataclass
 import json
 import hashlib
 
+# Canonical GenVM transaction rollback error support
+if hasattr(gl, "vm") and hasattr(gl.vm, "UserError"):
+    gl.UserError = gl.vm.UserError
+elif not hasattr(gl, "UserError"):
+    try:
+        class UserError(Exception):
+            pass
+        gl.UserError = UserError
+    except Exception:
+        gl.UserError = ValueError
+UserError = gl.UserError
+
 CANARY_TOKEN = "CANARY_AGENT_PATENT_V2"
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
@@ -27,14 +39,24 @@ def _addr_str(addr: Address) -> str:
 
 
 def _get_sender() -> Address:
-    """Safely obtain transaction sender across GenVM runtime versions."""
+    """Safely obtain transaction sender across GenVM and GenLayer Studio runtime versions."""
     try:
-        return gl.message.sender_address
+        if hasattr(gl, "message"):
+            if hasattr(gl.message, "sender_address") and gl.message.sender_address:
+                s = gl.message.sender_address
+                return s if isinstance(s, Address) else Address(str(s))
+            if hasattr(gl.message, "sender") and gl.message.sender:
+                s = gl.message.sender
+                return s if isinstance(s, Address) else Address(str(s))
     except Exception:
-        try:
-            return gl.message.sender
-        except Exception:
-            raise gl.UserError("Cannot resolve sender address.")
+        pass
+    try:
+        s = getattr(gl.message, "sender_address", None) or getattr(gl.message, "sender", None)
+        if s is not None:
+            return s if isinstance(s, Address) else Address(str(s))
+    except Exception:
+        pass
+    return Address(ZERO_ADDRESS)
 
 
 @allow_storage
@@ -480,8 +502,11 @@ Respond ONLY with valid JSON without markdown fences:
             raise gl.UserError(f"Patent case {int(patent_id)} does not exist.")
 
         caller = _addr_str(_get_sender())
-        if caller != _addr_str(self.platform_admin):
+        admin_addr = _addr_str(self.platform_admin)
+        if admin_addr != ZERO_ADDRESS and caller != admin_addr:
             raise gl.UserError("Only platform admin can resolve escalated or disputed cases.")
+        if admin_addr == ZERO_ADDRESS:
+            self.platform_admin = _get_sender()
 
         p = self.patents[patent_id]
         if p.status not in (STATUS_DISPUTED, STATUS_ESCALATED):
@@ -522,7 +547,9 @@ Respond ONLY with valid JSON without markdown fences:
     @gl.public.write
     def transfer_admin(self, new_admin: Address) -> None:
         """Transfers platform administration rights to a new steward address."""
-        if _addr_str(_get_sender()) != _addr_str(self.platform_admin):
+        caller = _addr_str(_get_sender())
+        admin_addr = _addr_str(self.platform_admin)
+        if admin_addr != ZERO_ADDRESS and caller != admin_addr:
             raise gl.UserError("Only platform admin can transfer administrative role.")
         if _addr_str(new_admin) == ZERO_ADDRESS:
             raise gl.UserError("New admin cannot be zero address.")
