@@ -8,7 +8,7 @@ export const STUDIONET_RPC_URL = 'https://studio.genlayer.com/api';
 export const STUDIO_URL = 'https://studio.genlayer.com';
 
 // Default contract address (can be updated dynamically in UI)
-export const DEFAULT_CONTRACT_ADDRESS = '0x0B29F8CdB545600756119aB50EDe3639e4ce73A6';
+export const DEFAULT_CONTRACT_ADDRESS = '0xc39422c09c9Cec052Dc2013f079dC23DFdca1ece';
 
 export function getSavedContractAddress(): string {
   if (typeof window !== 'undefined') {
@@ -17,7 +17,8 @@ export function getSavedContractAddress(): string {
       if (
         !stored ||
         stored.toLowerCase() === '0xb96502213797c276008b49704e6c273030432f89'.toLowerCase() ||
-        stored.toLowerCase() === '0xCE8973E9d7ed7eA05b93aCb178e2715Ea9f1Ff39'.toLowerCase()
+        stored.toLowerCase() === '0xCE8973E9d7ed7eA05b93aCb178e2715Ea9f1Ff39'.toLowerCase() ||
+        stored.toLowerCase() === '0x0B29F8CdB545600756119aB50EDe3639e4ce73A6'.toLowerCase()
       ) {
         localStorage.setItem('agentpatent_contract_address', DEFAULT_CONTRACT_ADDRESS);
         return DEFAULT_CONTRACT_ADDRESS;
