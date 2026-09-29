@@ -118,7 +118,6 @@ export interface ProtocolStats {
   total_patent_locked: string;
   total_disputes_resolved: number;
   active_examinations?: number;
-  platform_admin?: string;
 }
 
 /**
@@ -419,21 +418,10 @@ export async function raiseDisputeOnChain(
   contractAddress: string,
   userAddress: string,
   patentId: number | string,
-  reason: string,
-  bondWei: bigint = 0n
+  newEvidenceUrl: string,
+  bondWei: bigint
 ): Promise<string> {
-  await ensureStudionet();
-  const client = getGenLayerClient(userAddress);
-
-  const txHash = await client.writeContract({
-    address: contractAddress as `0x${string}`,
-    functionName: 'raise_dispute',
-    args: [String(patentId), reason.trim()],
-    value: bondWei,
-  });
-
-  await client.waitForTransactionReceipt({ hash: txHash });
-  return txHash;
+  return appealVerdictOnChain(contractAddress, userAddress, patentId, newEvidenceUrl, bondWei);
 }
 
 /**
@@ -464,21 +452,9 @@ export async function finalizeSettlementOnChain(
 export async function resolveEscalationOnChain(
   contractAddress: string,
   userAddress: string,
-  patentId: number | string,
-  resolution: 'INVALIDATE' | 'UPHOLD' | 'REFUND_SPLIT'
+  patentId: number | string
 ): Promise<string> {
-  await ensureStudionet();
-  const client = getGenLayerClient(userAddress);
-
-  const txHash = await client.writeContract({
-    address: contractAddress as `0x${string}`,
-    functionName: 'resolve_escalation',
-    args: [String(patentId), resolution],
-    value: 0n,
-  });
-
-  await client.waitForTransactionReceipt({ hash: txHash });
-  return txHash;
+  return adjudicateAppealOnChain(contractAddress, userAddress, patentId);
 }
 
 /**

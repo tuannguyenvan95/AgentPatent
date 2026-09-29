@@ -29,6 +29,7 @@ interface ForensicBenchProps {
   patent: PatentCaseData | null;
   onOpenChallenge: (patent: PatentCaseData) => void;
   onAdjudicate: (patentId: number | string) => void;
+  onAdjudicateAppeal?: (patentId: number | string) => void;
   onReclaimExpired?: (patentId: number | string) => void;
   actionLoading: boolean;
   userAddress?: string;
@@ -38,6 +39,7 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
   patent,
   onOpenChallenge,
   onAdjudicate,
+  onAdjudicateAppeal,
   onReclaimExpired,
   actionLoading,
   userAddress,
@@ -66,6 +68,7 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
   const isUpheld = patent.verdict === 'PATENT_UPHELD_VALID';
   const hasPriorArt = !!patent.prior_art_url;
   const isPending = patent.status === 1;
+  const isDisputed = patent.status === 6 || patent.status === 7;
   const isInventor = Boolean(
     userAddress &&
     patent.inventor &&
@@ -299,6 +302,53 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
                   </button>
                 </div>
               )}
+
+              {/* Appellate Inquest notice if Disputed */}
+              {isDisputed && (
+                <div className="mt-auto p-3.5 rounded-xl bg-purple-950/40 border border-purple-500/50 text-center text-xs space-y-2">
+                  <p className="text-purple-300 font-space font-bold uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    <Scale className="h-3.5 w-3.5 animate-pulse text-purple-400" />
+                    Appellate Writ Filed • Supreme AI Deliberation Ready
+                  </p>
+                  {patent.appeal_evidence_url && (
+                    <div className="p-2 rounded bg-[#070A11] border border-purple-500/30 text-[10px] font-mono text-purple-200 break-all text-left">
+                      <span className="text-slate-400 block text-[9px] uppercase tracking-wider">Rebuttal Counter-Evidence:</span>
+                      <a
+                        href={patent.appeal_evidence_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-cyan-300 underline inline-flex items-center gap-1"
+                      >
+                        {patent.appeal_evidence_url}
+                        <ExternalLink className="h-2.5 w-2.5" />
+                      </a>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => onAdjudicateAppeal && onAdjudicateAppeal(patent.patent_id)}
+                    disabled={actionLoading}
+                    className="w-full py-2 px-3 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-[#070A11] bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 hover:from-purple-300 hover:to-pink-300 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all flex items-center justify-center space-x-1.5 active:scale-98"
+                  >
+                    <Gavel className="h-3.5 w-3.5 stroke-[2.5]" />
+                    <span>Convene Supreme Appellate AI Court</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : patent.status === 5 ? (
+            /* Escrow refunded to inventor */
+            <div className="flex-1 bg-[#070A11] p-6 rounded-xl border border-dashed border-teal-500/40 flex flex-col items-center justify-center text-center">
+              <CheckCircle2 className="h-10 w-10 text-teal-400 mb-2 opacity-90" />
+              <h4 className="font-space text-sm font-bold text-teal-300 uppercase tracking-wider">
+                ESCROW REFUNDED // CASE ARCHIVED
+              </h4>
+              <p className="text-xs font-mono text-slate-400 mt-1 max-w-xs">
+                Validity escrow of {formatGen(patent.escrow_deposit)} GEN has been disbursed back to the inventor's wallet. Case is closed and archived on-chain.
+              </p>
+              <div className="mt-4 px-3 py-1.5 rounded-lg bg-teal-950/40 border border-teal-500/40 text-[11px] font-mono text-teal-300 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-teal-400" />
+                <span>Escrow Transferred to {truncateAddress(patent.inventor)}</span>
+              </div>
             </div>
           ) : isExpired ? (
             /* No challenge filed & term expired uncontested */

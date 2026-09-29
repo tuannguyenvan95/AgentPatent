@@ -7,7 +7,6 @@ import { RegisterPatentModal } from './components/RegisterPatentModal';
 import { ChallengeModal } from './components/ChallengeModal';
 import { ExaminationModal } from './components/ExaminationModal';
 import { DisputeModal } from './components/DisputeModal';
-import { AdminArbitrationModal } from './components/AdminArbitrationModal';
 import {
   getSavedContractAddress,
   saveContractAddress,
@@ -18,9 +17,10 @@ import {
   registerPatentClaimOnChain,
   challengePriorArtOnChain,
   adjudicateCollisionOnChain,
+  appealVerdictOnChain,
+  adjudicateAppealOnChain,
   raiseDisputeOnChain,
   finalizeSettlementOnChain,
-  resolveEscalationOnChain,
   reclaimExpiredPatentOnChain,
   PatentCaseData,
   ProtocolStats,
@@ -56,7 +56,6 @@ export const App: React.FC = () => {
   const [challengeTarget, setChallengeTarget] = useState<PatentCaseData | null>(null);
   const [examinationTarget, setExaminationTarget] = useState<PatentCaseData | null>(null);
   const [disputeTarget, setDisputeTarget] = useState<PatentCaseData | null>(null);
-  const [adminArbitrationTarget, setAdminArbitrationTarget] = useState<PatentCaseData | null>(null);
 
   const showToast = (type: 'success' | 'error' | 'info', text: string) => {
     setNotification({ type, text });
@@ -234,19 +233,42 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleRaiseDispute = async (patentId: number | string, reason: string) => {
+  const handleRaiseDispute = async (
+    patentId: number | string,
+    newEvidenceUrl: string,
+    bondWei: bigint
+  ) => {
     if (!userAddress) {
       await handleConnectWallet();
       return;
     }
     setActionLoading(true);
     try {
-      showToast('info', 'Filing writ of appeal. Freezing escrow for Lord Chief Justice...');
-      const tx = await raiseDisputeOnChain(contractAddress, userAddress, patentId, reason);
-      showToast('success', `Writ accepted! Docket #${patentId} transferred to Steward. Tx: ${tx.slice(0, 10)}...`);
+      showToast('info', 'Filing appellate writ with staked bond on GenLayer...');
+      const tx = await appealVerdictOnChain(contractAddress, userAddress, patentId, newEvidenceUrl, bondWei);
+      showToast('success', `Appellate writ accepted! Dossier #${patentId} elevated for Supreme AI review. Tx: ${tx.slice(0, 10)}...`);
       await refreshData();
     } catch (err: any) {
       showToast('error', err?.message || 'Failed to file appeal');
+      throw err;
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleAdjudicateAppeal = async (patentId: number | string) => {
+    if (!userAddress) {
+      await handleConnectWallet();
+      return;
+    }
+    setActionLoading(true);
+    try {
+      showToast('info', 'Convening Supreme Appellate AI Court on GenLayer...');
+      const tx = await adjudicateAppealOnChain(contractAddress, userAddress, patentId);
+      showToast('success', `Supreme appellate decree enacted! Appeal resolved on-chain. Tx: ${tx.slice(0, 10)}...`);
+      await refreshData();
+    } catch (err: any) {
+      showToast('error', err?.message || 'Appellate deliberation failed.');
       throw err;
     } finally {
       setActionLoading(false);
@@ -266,28 +288,6 @@ export const App: React.FC = () => {
       await refreshData();
     } catch (err: any) {
       showToast('error', err?.message || 'Execution halted. Cooling-off timelock may still be active.');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleResolveEscalation = async (
-    patentId: number | string,
-    resolution: 'INVALIDATE' | 'UPHOLD' | 'REFUND_SPLIT'
-  ) => {
-    if (!userAddress) {
-      await handleConnectWallet();
-      return;
-    }
-    setActionLoading(true);
-    try {
-      showToast('info', `Lord Chief Justice executing sovereign decree: ${resolution}...`);
-      const tx = await resolveEscalationOnChain(contractAddress, userAddress, patentId, resolution);
-      showToast('success', `Sovereign resolution enacted! Tx: ${tx.slice(0, 10)}...`);
-      await refreshData();
-    } catch (err: any) {
-      showToast('error', err?.message || 'Arbitration execution failed');
-      throw err;
     } finally {
       setActionLoading(false);
     }
@@ -386,6 +386,7 @@ export const App: React.FC = () => {
           patent={selectedPatent}
           onOpenChallenge={(p) => setChallengeTarget(p)}
           onAdjudicate={handleAdjudicateCollision}
+          onAdjudicateAppeal={handleAdjudicateAppeal}
           onReclaimExpired={handleReclaimExpired}
           actionLoading={actionLoading}
           userAddress={userAddress}
@@ -398,8 +399,8 @@ export const App: React.FC = () => {
           userAddress={userAddress}
           onOpenChallenge={(p) => setChallengeTarget(p)}
           onOpenDispute={(p) => setDisputeTarget(p)}
-          onOpenAdminArbitration={(p) => setAdminArbitrationTarget(p)}
           onAdjudicate={handleAdjudicateCollision}
+          onAdjudicateAppeal={handleAdjudicateAppeal}
           onFinalizeSettlement={handleFinalizeSettlement}
           onReclaimExpired={handleReclaimExpired}
           actionLoading={actionLoading}
@@ -435,14 +436,6 @@ export const App: React.FC = () => {
         patent={disputeTarget}
         onClose={() => setDisputeTarget(null)}
         onSubmit={handleRaiseDispute}
-        loading={actionLoading}
-      />
-
-      <AdminArbitrationModal
-        isOpen={!!adminArbitrationTarget}
-        patent={adminArbitrationTarget}
-        onClose={() => setAdminArbitrationTarget(null)}
-        onSubmit={handleResolveEscalation}
         loading={actionLoading}
       />
     </div>

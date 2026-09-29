@@ -59,25 +59,26 @@ Dự án **AgentPatent** ứng dụng các tiến bộ bảo mật vượt bậc
                                     │                                                                             │
                       ┌─────────────┴─────────────┐                                                 ┌─────────────┴─────────────┐
                       ▼                           ▼                                                 ▼                           ▼
-                No Dispute                  Lodge Dispute                                     No Dispute                  Lodge Dispute
-         (finalize_settlement)             (raise_dispute)                             (finalize_settlement)             (raise_dispute)
+                No Dispute                   Appeal Filed                                      No Dispute                  Appeal Filed
+          (finalize_settlement)            (appeal_verdict)                             (finalize_settlement)            (appeal_verdict)
                       │                           │                                                 │                           │
                       ▼                           ▼                                                 ▼                           ▼
           100% Escrow + Bond paid          Status: DISPUTED                                  Validity Escrow + Bond           Status: DISPUTED
-          to Challenger autonomously     Admin Arbitration                             awarded to Inventor autonomously     Admin Arbitration
+          to Challenger autonomously    Supreme AI Appellate Jury                          awarded to Inventor autonomously Supreme AI Appellate Jury
+                                           (adjudicate_appeal)                                                              (adjudicate_appeal)
 ```
 
 ---
 
 ## 🛡️ 3. Các Tính Năng An Toàn, Giữ Tiền & Phân Quyền Vai Trò (Milestones v2/v3)
 
-1. **Phân quyền vai trò nghiêm ngặt (Role-Based Permissions):**
+1. **Phân quyền vai trò phi tập trung 100% (Zero-Admin Subjective Consensus):**
    - **Inventor (Applicant):** Nộp claims và cọc quỹ bảo chứng (`escrow_deposit`). Duy nhất Inventor có quyền thu hồi tiền khi hết hạn bảo vệ mà không bị thách thức (`reclaim_expired_patent`).
    - **Challenger:** Phải nộp URL công khai và stake tối thiểu 10% cọc chống spam (`challenger_bond`). Inventor không được tự kiện chính mình.
-   - **Protocol Steward (Platform Admin):** Khởi tạo khi deploy. Admin **không thể rút trộm tiền** của các bên (Timelock Invariant). Admin chỉ có quyền trọng tài (`resolve_escalation`) khi vụ việc rơi vào `DISPUTED` hoặc `ESCALATED`.
-2. **Khoảng thời gian ân hạn làm nguội (24-Block Cooling-Off Dispute Window):**
-   - Sau khi AI Examination Board đưa ra phán quyết, hợp đồng **không giải ngân ngay** mà chuyển sang trạng thái `AWAITING_PAYOUT` với timelock 24 block.
-   - Các bên có quyền gọi `raise_dispute` nếu phát hiện sai sót kỹ thuật hoặc AI bị ảo giác, đóng băng quỹ chuyển sang `DISPUTED`.
+   - **Supreme Appellate AI Jury (`adjudicate_appeal`):** Không có Private Key Admin tập trung can thiệp. Khi có kháng cáo kèm 10% payable bond và link counter-evidence, các validator GenLayer thực hiện web-scraping độc lập và phúc thẩm tự động on-chain.
+2. **Khoảng thời gian ân hạn làm nguội (Cooling-Off Dispute Window):**
+   - Sau khi AI Examination Board đưa ra phán quyết, hợp đồng **không giải ngân ngay** mà chuyển sang trạng thái `AWAITING_PAYOUT` với timelock làm nguội (5 phút / 24 block).
+   - Đương sự (Inventor hoặc Challenger) có quyền gọi `appeal_verdict` với bằng chứng phản biện mới và 10% bond, chuyển hồ sơ sang `STATUS_DISPUTED`.
 3. **Phòng chống tấn công Prompt Injection & Canary Token:**
    - Hàm `_sanitize_input` tự động thanh lọc các payload độc hại (jailbreak, system override).
    - Kiểm tra mã bảo mật ngầm `CANARY_AGENT_PATENT_V2`. Nếu LLM phản hồi thiếu canary hoặc độ tin cậy `< 60%`, hợp đồng tự động chuyển sang `STATUS_ESCALATED` để bảo vệ 100% tài sản trong quỹ.
@@ -99,10 +100,10 @@ Dự án **AgentPatent** ứng dụng các tiến bộ bảo mật vượt bậc
 | `register_patent_claim(title, claims, duration)` | Public (Payable) | Inventor nộp claims và khóa GEN bảo chứng tính nguyên bản. |
 | `challenge_prior_art(patent_id, url)` | Challenger (Payable) | Thách thức sáng chế, nộp URL Prior Art và stake cọc ≥10%. |
 | `adjudicate_collision(patent_id)` | Public | Kích hoạt AI Examination Board cào web và thẩm định kỹ thuật. |
-| `raise_dispute(patent_id, reason)` | Inventor / Challenger | Kháng nghị phán quyết trong 24 block cooling-off, đóng băng quỹ. |
-| `finalize_settlement(patent_id)` | Public | Giải ngân tiền dứt điểm sau khi hết 24 block mà không có tranh chấp. |
-| `resolve_escalation(patent_id, resolution)` | Platform Admin | Trọng tài xử lý các vụ việc `DISPUTED` hoặc `ESCALATED`. |
-| `reclaim_expired_patent(patent_id)` | Inventor | Rút lại 100% tiền bảo chứng khi hết hạn bảo vệ mà không bị hủy. |
+| `appeal_verdict(patent_id, new_evidence_url)` | Inventor / Challenger (Payable) | Kháng nghị phán quyết trong cooling-off kèm URL bằng chứng phản biện và stake 10% bond. |
+| `adjudicate_appeal(patent_id)` | Public | Kích hoạt Hội đồng AI Phúc thẩm tối cao (Supreme Appellate AI Jury) giải quyết dứt điểm on-chain. |
+| `finalize_settlement(patent_id)` | Public | Giải ngân tiền dứt điểm sau khi hết 5 phút cooling-off mà không có kháng cáo. |
+| `reclaim_expired_patent(patent_id)` | Inventor | Rút lại 100% tiền bảo chứng khi hết hạn bảo vệ mà không có ai khiếu nại. |
 | `get_patent(patent_id)` | View | Xem chi tiết 1 hồ sơ sáng chế dạng JSON. |
 | `get_all_patents()` | View | Lấy toàn bộ danh sách sáng chế phục vụ render frontend tức thì. |
 | `get_stats()` | View | Thống kê tổng quan hệ thống (Tổng escrow, số vụ đã giải quyết). |

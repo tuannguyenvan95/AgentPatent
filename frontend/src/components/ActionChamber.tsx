@@ -28,8 +28,8 @@ interface ActionChamberProps {
   userAddress: string;
   onOpenChallenge: (patent: PatentCaseData) => void;
   onOpenDispute: (patent: PatentCaseData) => void;
-  onOpenAdminArbitration: (patent: PatentCaseData) => void;
   onAdjudicate: (patentId: number | string) => void;
+  onAdjudicateAppeal: (patentId: number | string) => void;
   onFinalizeSettlement: (patentId: number | string) => void;
   onReclaimExpired: (patentId: number | string) => void;
   actionLoading: boolean;
@@ -41,28 +41,23 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
   userAddress,
   onOpenChallenge,
   onOpenDispute,
-  onOpenAdminArbitration,
   onAdjudicate,
+  onAdjudicateAppeal,
   onFinalizeSettlement,
   onReclaimExpired,
   actionLoading,
 }) => {
   const isInventor = !!(userAddress && patent && patent.inventor.toLowerCase() === userAddress.toLowerCase());
   const isChallenger = !!(userAddress && patent && patent.challenger.toLowerCase() === userAddress.toLowerCase());
-  const isAdmin = !!(userAddress && stats.platform_admin && stats.platform_admin.toLowerCase() === userAddress.toLowerCase());
   const statusMeta = patent ? getStatusMeta(patent.status) : null;
 
-  // Active Role computation
+  // Active Role computation (Decentralized Participant Matrix)
   let currentRoleLabel = 'OBSERVER (WALLET NOT CONNECTED)';
   let currentRoleBadge = 'bg-slate-800 text-slate-400 border-slate-700';
   let roleIconColor = 'text-slate-500';
 
   if (userAddress) {
-    if (isAdmin) {
-      currentRoleLabel = 'PROTOCOL ADMIN / STEWARD';
-      currentRoleBadge = 'bg-purple-950/80 text-purple-300 border-purple-500/50';
-      roleIconColor = 'text-purple-400';
-    } else if (isInventor) {
+    if (isInventor) {
       currentRoleLabel = 'PATENT APPLICANT / INVENTOR';
       currentRoleBadge = 'bg-cyan-950/80 text-cyan-300 border-cyan-500/50';
       roleIconColor = 'text-cyan-400';
@@ -223,22 +218,29 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
 
               {/* Status 6 or 7: DISPUTED or ESCALATED */}
               {(patent.status === 6 || patent.status === 7) && (
-                <>
-                  {isAdmin ? (
-                    <button
-                      onClick={() => onOpenAdminArbitration(patent)}
-                      disabled={actionLoading}
-                      className="w-full py-2.5 px-3 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-purple-200 bg-purple-950/80 hover:bg-purple-900 border border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all flex items-center justify-center space-x-2"
-                    >
-                      <Gavel className="h-4 w-4 text-purple-300" />
-                      <span>Admin Arbitration Hearing</span>
-                    </button>
-                  ) : (
-                    <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-600/50 text-[11px] text-amber-200 text-center font-mono">
-                      // ESCALATED: Pending Protocol Admin ({truncateAddress(stats.platform_admin || '')}) arbitration.
+                <div className="space-y-2">
+                  <div className="p-2.5 rounded-lg bg-purple-950/40 border border-purple-500/50 text-[11px] font-mono text-purple-200 space-y-1">
+                    <div className="flex items-center gap-1.5 font-bold text-purple-300">
+                      <Scale className="h-3.5 w-3.5" />
+                      <span>Appellate Review in Session</span>
                     </div>
-                  )}
-                </>
+                    <p className="text-[10px] text-slate-300">
+                      Formal appeal filed with counter-evidence. Multi-validator appellate court is ready for subjective deliberation.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => onAdjudicateAppeal(patent.patent_id)}
+                    disabled={actionLoading}
+                    className="w-full py-2.5 px-3 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-[#070A11] bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 hover:from-purple-300 hover:to-pink-300 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all flex items-center justify-center space-x-2 active:scale-98"
+                  >
+                    <Gavel className="h-4 w-4 stroke-[2.5]" />
+                    <span>Trigger Supreme Appellate AI Deliberation</span>
+                  </button>
+                  <p className="text-[10px] font-mono text-slate-500 text-center">
+                    Autonomous multi-validator consensus evaluates rebuttal evidence on-chain
+                  </p>
+                </div>
               )}
 
               {/* Status 3, 4, 5: SETTLED */}
@@ -282,8 +284,8 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
           </div>
 
           <div className="flex justify-between items-center p-2 rounded-lg bg-[#070A11] border border-[#1E293B]">
-            <span className="text-slate-400">Protocol Admin:</span>
-            <span className="font-bold text-slate-300">{truncateAddress(stats.platform_admin || '')}</span>
+            <span className="text-slate-400">Governance:</span>
+            <span className="font-bold text-cyan-300">100% DECENTRALIZED</span>
           </div>
         </div>
       </div>

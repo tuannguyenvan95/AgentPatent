@@ -96,15 +96,10 @@ export const StatsBar: React.FC<StatsBarProps> = ({ stats, loading }) => {
             <Gavel className="h-5 w-5" />
           </div>
         </div>
-        <div className="mt-3 flex items-center text-[11px] font-cormorant italic text-slate-300 truncate">
-          {stats.platform_admin ? (
-            <span className="inline-flex items-center gap-1 font-mono text-slate-400">
-              <UserCheck className="h-3 w-3 text-[#C5A059]" />
-              Steward: {truncateAddress(stats.platform_admin)}
-            </span>
-          ) : (
-            <span>Autonomous GenLayer AI Consensus</span>
-          )}
+        <div className="mt-3 flex items-center text-[11px] font-cormorant italic text-slate-300">
+          <span className="font-semibold text-emerald-400">Autonomous Settlement</span>
+          <span className="mx-1.5 text-slate-600">•</span>
+          <span>GenLayer Multi-Validator AI Consensus</span>
         </div>
       </div>
     </div>
