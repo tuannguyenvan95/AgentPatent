@@ -768,13 +768,3 @@ Output JSON with "canary": "{CANARY_TOKEN}":
             "active_examinations": active_exams,
         }
         return json.dumps(data)
-
-    @gl.public.view
-    def get_patent_count(self) -> int:
-        return len(self.patent_ids)
-
-    @gl.public.view
-    def get_patent_id_by_index(self, idx: int) -> str:
-        if idx < 0 or idx >= len(self.patent_ids):
-            raise gl.UserError("Index out of bounds.")
-        return self.patent_ids[idx]
