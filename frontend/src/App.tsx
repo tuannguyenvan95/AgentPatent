@@ -386,6 +386,7 @@ export const App: React.FC = () => {
           patent={selectedPatent}
           onOpenChallenge={(p) => setChallengeTarget(p)}
           onAdjudicate={handleAdjudicateCollision}
+          onReclaimExpired={handleReclaimExpired}
           actionLoading={actionLoading}
           userAddress={userAddress}
         />

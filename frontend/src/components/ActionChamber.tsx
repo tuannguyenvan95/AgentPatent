@@ -77,6 +77,9 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
     }
   }
 
+  const nowSec = Math.floor(Date.now() / 1000);
+  const isExpired = patent?.expires_at_time ? nowSec > Number(patent.expires_at_time) : false;
+
   return (
     <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col bg-[#0A0E17]/95 border-l border-[#06B6D4]/20 h-[calc(100vh-4rem)] overflow-y-auto p-4 space-y-4">
       {/* Panel 1: Contextual Litigation Action Hub */}
@@ -124,7 +127,17 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
               {/* Status 0: ACTIVE_PROTECTED */}
               {patent.status === 0 && (
                 <>
-                  {!isInventor ? (
+                  {isExpired ? (
+                    <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-500/40 text-[11px] font-mono text-emerald-300 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                        <span>Term Lapsed Uncontested</span>
+                      </div>
+                      <p className="text-slate-400 text-[10px]">
+                        Protection window elapsed without prior art opposition. Escrow ready for refund.
+                      </p>
+                    </div>
+                  ) : !isInventor ? (
                     <button
                       onClick={() => onOpenChallenge(patent)}
                       disabled={actionLoading}
@@ -149,10 +162,14 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
                     <button
                       onClick={() => onReclaimExpired(patent.patent_id)}
                       disabled={actionLoading}
-                      className="w-full py-2.5 px-3 rounded-lg text-xs font-space font-semibold uppercase tracking-wider text-cyan-200 bg-[#0A0E17] hover:bg-[#121A2E] border border-cyan-500/40 transition-colors flex items-center justify-center space-x-2"
+                      className={`w-full py-2.5 px-3 rounded-lg text-xs font-space font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 ${
+                        isExpired
+                          ? 'bg-gradient-to-r from-emerald-400 to-teal-400 text-[#070A11] hover:from-emerald-300 hover:to-teal-300 shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-98'
+                          : 'text-cyan-200 bg-[#0A0E17] hover:bg-[#121A2E] border border-cyan-500/40'
+                      }`}
                     >
-                      <RotateCcw className="h-4 w-4 text-cyan-400" />
-                      <span>Reclaim Escrow (If Term Lapsed)</span>
+                      <RotateCcw className="h-4 w-4" />
+                      <span>{isExpired ? 'Reclaim Escrow (Term Lapsed)' : 'Reclaim Escrow (If Term Lapsed)'}</span>
                     </button>
                   )}
                 </>

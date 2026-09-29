@@ -19,6 +19,8 @@ import {
   FileCode,
   ShieldAlert,
   ArrowRightLeft,
+  ShieldCheck,
+  RotateCcw,
 } from 'lucide-react';
 import { PatentCaseData } from '../config/genlayer';
 import { formatGen, truncateAddress, getStatusMeta } from '../utils/helpers';
@@ -27,6 +29,7 @@ interface ForensicBenchProps {
   patent: PatentCaseData | null;
   onOpenChallenge: (patent: PatentCaseData) => void;
   onAdjudicate: (patentId: number | string) => void;
+  onReclaimExpired?: (patentId: number | string) => void;
   actionLoading: boolean;
   userAddress?: string;
 }
@@ -35,6 +38,7 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
   patent,
   onOpenChallenge,
   onAdjudicate,
+  onReclaimExpired,
   actionLoading,
   userAddress,
 }) => {
@@ -67,6 +71,8 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
     patent.inventor &&
     userAddress.toLowerCase() === patent.inventor.toLowerCase()
   );
+  const nowSec = Math.floor(Date.now() / 1000);
+  const isExpired = patent.expires_at_time ? nowSec > Number(patent.expires_at_time) : false;
 
   // Collision Radar calculations for SVG Circle
   const radius = 38;
@@ -291,6 +297,36 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
                   >
                     Run GenLayer Web Scrape & Consensus Engine
                   </button>
+                </div>
+              )}
+            </div>
+          ) : isExpired ? (
+            /* No challenge filed & term expired uncontested */
+            <div className="flex-1 bg-[#070A11] p-6 rounded-xl border border-dashed border-emerald-500/30 flex flex-col items-center justify-center text-center">
+              <ShieldCheck className="h-10 w-10 text-emerald-400 mb-2 opacity-90" />
+              <h4 className="font-space text-sm font-bold text-emerald-300 uppercase tracking-wider">
+                PROTECTION TERM LAPSED // UNCONTESTED
+              </h4>
+              <p className="text-xs font-mono text-slate-400 mt-1 max-w-xs">
+                This patent claim survived the public examination window without any prior art challenges. Novelty is confirmed by default on-chain.
+              </p>
+              {isInventor ? (
+                <div className="mt-4 flex flex-col items-center gap-1.5 w-full max-w-xs">
+                  <button
+                    onClick={() => onReclaimExpired && onReclaimExpired(patent.patent_id)}
+                    disabled={actionLoading}
+                    className="w-full px-4 py-2.5 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-[#070A11] bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all active:scale-98 flex items-center justify-center space-x-2"
+                  >
+                    <RotateCcw className="h-4 w-4 stroke-[2.5]" />
+                    <span>Reclaim Escrow ({formatGen(patent.escrow_deposit)} GEN)</span>
+                  </button>
+                  <p className="text-[10px] font-mono text-emerald-400">
+                    Term expired safely. You can now reclaim your full escrow deposit.
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-4 p-2.5 rounded-lg bg-[#0F1523] border border-slate-700 text-xs font-mono text-slate-400 max-w-xs">
+                  Protection period ended. Prior art challenges are closed.
                 </div>
               )}
             </div>

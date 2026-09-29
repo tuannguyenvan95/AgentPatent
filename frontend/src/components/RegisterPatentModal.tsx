@@ -17,7 +17,7 @@ export const RegisterPatentModal: React.FC<RegisterPatentModalProps> = ({
 }) => {
   const [title, setTitle] = useState('');
   const [claims, setClaims] = useState('');
-  const [duration, setDuration] = useState('500');
+  const [duration, setDuration] = useState('86400');
   const [deposit, setDeposit] = useState('3.5');
   const [error, setError] = useState('');
 
@@ -165,20 +165,57 @@ export const RegisterPatentModal: React.FC<RegisterPatentModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-space font-semibold uppercase tracking-wider text-cyan-300 mb-1">
-                Term Duration (Blocks)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-space font-semibold uppercase tracking-wider text-cyan-300">
+                  Term Duration (Seconds)
+                </label>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setDuration('3600')}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
+                      duration === '3600'
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
+                        : 'bg-[#070A11] text-slate-400 border-[#1E293B] hover:text-slate-200'
+                    }`}
+                  >
+                    1h
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDuration('86400')}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
+                      duration === '86400'
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
+                        : 'bg-[#070A11] text-slate-400 border-[#1E293B] hover:text-slate-200'
+                    }`}
+                  >
+                    24h
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDuration('604800')}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-colors ${
+                      duration === '604800'
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
+                        : 'bg-[#070A11] text-slate-400 border-[#1E293B] hover:text-slate-200'
+                    }`}
+                  >
+                    7d
+                  </button>
+                </div>
+              </div>
               <input
                 type="number"
-                min="50"
+                min="60"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                placeholder="500"
+                placeholder="86400"
                 className="w-full px-3.5 py-2.5 text-xs font-mono bg-[#070A11] border border-[#1E293B] rounded-xl text-slate-200 focus:outline-none focus:border-cyan-400"
                 disabled={loading}
               />
               <p className="text-[11px] font-mono text-slate-500 mt-1">
-                Window of blocks open to public prior art indictments.
+                Protection window (seconds) open for scientific peer examination.
               </p>
             </div>
           </div>
