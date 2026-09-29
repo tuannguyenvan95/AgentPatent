@@ -24,7 +24,7 @@ interface ExaminationModalProps {
   isOpen: boolean;
   patent: PatentCaseData | null;
   onClose: () => void;
-  onAdjudicate?: (patentId: number) => Promise<void>;
+  onAdjudicate?: (patentId: number | string) => Promise<void>;
   adjudicating?: boolean;
 }
 

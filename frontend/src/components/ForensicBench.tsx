@@ -26,7 +26,7 @@ import { formatGen, truncateAddress, getStatusMeta } from '../utils/helpers';
 interface ForensicBenchProps {
   patent: PatentCaseData | null;
   onOpenChallenge: (patent: PatentCaseData) => void;
-  onAdjudicate: (patentId: number) => void;
+  onAdjudicate: (patentId: number | string) => void;
   actionLoading: boolean;
 }
 

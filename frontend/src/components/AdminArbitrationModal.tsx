@@ -7,7 +7,7 @@ interface AdminArbitrationModalProps {
   isOpen: boolean;
   patent: PatentCaseData | null;
   onClose: () => void;
-  onSubmit: (patentId: number, resolution: 'INVALIDATE' | 'UPHOLD' | 'REFUND_SPLIT') => Promise<void>;
+  onSubmit: (patentId: number | string, resolution: 'INVALIDATE' | 'UPHOLD' | 'REFUND_SPLIT') => Promise<void>;
   loading: boolean;
 }
 

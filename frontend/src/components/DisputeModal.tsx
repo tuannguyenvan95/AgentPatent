@@ -6,7 +6,7 @@ interface DisputeModalProps {
   isOpen: boolean;
   patent: PatentCaseData | null;
   onClose: () => void;
-  onSubmit: (patentId: number, reason: string) => Promise<void>;
+  onSubmit: (patentId: number | string, reason: string) => Promise<void>;
   loading: boolean;
 }
 

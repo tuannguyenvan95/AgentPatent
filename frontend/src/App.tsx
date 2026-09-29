@@ -187,7 +187,7 @@ export const App: React.FC = () => {
   };
 
   const handleChallengePriorArt = async (
-    patentId: number,
+    patentId: number | string,
     priorArtUrl: string,
     bondGen: string
   ) => {
@@ -216,7 +216,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleAdjudicateCollision = async (patentId: number) => {
+  const handleAdjudicateCollision = async (patentId: number | string) => {
     if (!userAddress) {
       await handleConnectWallet();
       return;
@@ -234,7 +234,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleRaiseDispute = async (patentId: number, reason: string) => {
+  const handleRaiseDispute = async (patentId: number | string, reason: string) => {
     if (!userAddress) {
       await handleConnectWallet();
       return;
@@ -253,7 +253,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleFinalizeSettlement = async (patentId: number) => {
+  const handleFinalizeSettlement = async (patentId: number | string) => {
     if (!userAddress) {
       await handleConnectWallet();
       return;
@@ -272,7 +272,7 @@ export const App: React.FC = () => {
   };
 
   const handleResolveEscalation = async (
-    patentId: number,
+    patentId: number | string,
     resolution: 'INVALIDATE' | 'UPHOLD' | 'REFUND_SPLIT'
   ) => {
     if (!userAddress) {
@@ -293,7 +293,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleReclaimExpired = async (patentId: number) => {
+  const handleReclaimExpired = async (patentId: number | string) => {
     if (!userAddress) {
       await handleConnectWallet();
       return;

@@ -7,7 +7,7 @@ interface ChallengeModalProps {
   isOpen: boolean;
   patent: PatentCaseData | null;
   onClose: () => void;
-  onSubmit: (patentId: number, priorArtUrl: string, bondGen: string) => Promise<void>;
+  onSubmit: (patentId: number | string, priorArtUrl: string, bondGen: string) => Promise<void>;
   loading: boolean;
 }
 

@@ -25,9 +25,9 @@ interface PatentCardProps {
   onOpenExamination: (patent: PatentCaseData) => void;
   onOpenDispute: (patent: PatentCaseData) => void;
   onOpenAdminArbitration: (patent: PatentCaseData) => void;
-  onAdjudicate: (patentId: number) => void;
-  onFinalizeSettlement: (patentId: number) => void;
-  onReclaimExpired: (patentId: number) => void;
+  onAdjudicate: (patentId: number | string) => void;
+  onFinalizeSettlement: (patentId: number | string) => void;
+  onReclaimExpired: (patentId: number | string) => void;
   actionLoading: boolean;
 }
 

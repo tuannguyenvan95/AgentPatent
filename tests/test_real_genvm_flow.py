@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import json
 import pytest
@@ -25,11 +24,11 @@ def test_full_genvm_lifecycle(direct_deploy, direct_vm, direct_alice, direct_bob
         'We claim a multi-agent consensus protocol with subjective validity scoring and canary tokens.',
         1000
     )
-    assert pid == 1
+    assert pid == 'patent-1'
 
     # 3. Retrieve Patent
     p_data = json.loads(contract.get_patent(pid))
-    assert p_data['patent_id'] == 1
+    assert p_data['patent_id'] == 'patent-1'
     assert p_data['inventor'] == Address(direct_alice).as_hex.lower()
     assert p_data['status'] == 0
 

@@ -81,22 +81,30 @@ export async function fetchStudionetBalance(address: string): Promise<string> {
 }
 
 export interface PatentCaseData {
-  patent_id: number;
+  patent_id: number | string;
   inventor: string;
   challenger: string;
+  dispute_initiator?: string;
   escrow_deposit: string;
   challenger_bond: string;
+  dispute_bond?: string;
   patent_title: string;
   novelty_claims: string;
   prior_art_url: string;
-  evidence_hash: string;
+  appeal_evidence_url?: string;
+  evidence_hash?: string;
   status: number; // 0: ACTIVE, 1: IN_EXAM, 2: AWAITING_PAYOUT, 3: INVALIDATED, 4: UPHELD, 5: RECLAIMED, 6: DISPUTED, 7: ESCALATED
   verdict: string;
+  initial_verdict?: string;
   reason: string;
   confidence: number;
   overlap_score: number;
-  created_at_block: string;
-  expires_at_block: string;
+  created_at_time?: string;
+  expires_at_time?: string;
+  examination_started_time?: string;
+  audit_completed_time?: string;
+  created_at_block?: string;
+  expires_at_block?: string;
   examination_started_block?: string;
   payout_ready_at_block?: string;
   disputed?: boolean;
@@ -310,10 +318,13 @@ export async function registerPatentClaimOnChain(
 /**
  * Submit prior art URL and stake anti-griefing challenge bond
  */
+/**
+ * Submit prior art URL and stake anti-griefing challenge bond
+ */
 export async function challengePriorArtOnChain(
   contractAddress: string,
   userAddress: string,
-  patentId: number,
+  patentId: number | string,
   priorArtUrl: string,
   bondWei: bigint
 ): Promise<string> {
@@ -323,7 +334,7 @@ export async function challengePriorArtOnChain(
   const txHash = await client.writeContract({
     address: contractAddress as `0x${string}`,
     functionName: 'challenge_prior_art',
-    args: [patentId, priorArtUrl.trim()],
+    args: [String(patentId), priorArtUrl.trim()],
     value: bondWei,
   });
 
@@ -337,7 +348,7 @@ export async function challengePriorArtOnChain(
 export async function adjudicateCollisionOnChain(
   contractAddress: string,
   userAddress: string,
-  patentId: number
+  patentId: number | string
 ): Promise<string> {
   await ensureStudionet();
   const client = getGenLayerClient(userAddress);
@@ -345,7 +356,7 @@ export async function adjudicateCollisionOnChain(
   const txHash = await client.writeContract({
     address: contractAddress as `0x${string}`,
     functionName: 'adjudicate_collision',
-    args: [patentId],
+    args: [String(patentId)],
     value: 0n,
   });
 
@@ -354,13 +365,60 @@ export async function adjudicateCollisionOnChain(
 }
 
 /**
- * Raise a dispute during the 24-block cooling-off window
+ * Raise an appeal / contest verdict during the 5-minute cooling-off window with 10% bond
+ */
+export async function appealVerdictOnChain(
+  contractAddress: string,
+  userAddress: string,
+  patentId: number | string,
+  newEvidenceUrl: string,
+  bondWei: bigint
+): Promise<string> {
+  await ensureStudionet();
+  const client = getGenLayerClient(userAddress);
+
+  const txHash = await client.writeContract({
+    address: contractAddress as `0x${string}`,
+    functionName: 'appeal_verdict',
+    args: [String(patentId), newEvidenceUrl.trim()],
+    value: bondWei,
+  });
+
+  await client.waitForTransactionReceipt({ hash: txHash });
+  return txHash;
+}
+
+/**
+ * Convene High Court AI Jury to adjudicate appealed case
+ */
+export async function adjudicateAppealOnChain(
+  contractAddress: string,
+  userAddress: string,
+  patentId: number | string
+): Promise<string> {
+  await ensureStudionet();
+  const client = getGenLayerClient(userAddress);
+
+  const txHash = await client.writeContract({
+    address: contractAddress as `0x${string}`,
+    functionName: 'adjudicate_appeal',
+    args: [String(patentId)],
+    value: 0n,
+  });
+
+  await client.waitForTransactionReceipt({ hash: txHash });
+  return txHash;
+}
+
+/**
+ * Raise a dispute during the cooling-off window (compatibility alias for appeal)
  */
 export async function raiseDisputeOnChain(
   contractAddress: string,
   userAddress: string,
-  patentId: number,
-  reason: string
+  patentId: number | string,
+  reason: string,
+  bondWei: bigint = 0n
 ): Promise<string> {
   await ensureStudionet();
   const client = getGenLayerClient(userAddress);
@@ -368,8 +426,8 @@ export async function raiseDisputeOnChain(
   const txHash = await client.writeContract({
     address: contractAddress as `0x${string}`,
     functionName: 'raise_dispute',
-    args: [patentId, reason.trim()],
-    value: 0n,
+    args: [String(patentId), reason.trim()],
+    value: bondWei,
   });
 
   await client.waitForTransactionReceipt({ hash: txHash });
@@ -382,7 +440,7 @@ export async function raiseDisputeOnChain(
 export async function finalizeSettlementOnChain(
   contractAddress: string,
   userAddress: string,
-  patentId: number
+  patentId: number | string
 ): Promise<string> {
   await ensureStudionet();
   const client = getGenLayerClient(userAddress);
@@ -390,7 +448,7 @@ export async function finalizeSettlementOnChain(
   const txHash = await client.writeContract({
     address: contractAddress as `0x${string}`,
     functionName: 'finalize_settlement',
-    args: [patentId],
+    args: [String(patentId)],
     value: 0n,
   });
 
@@ -399,12 +457,12 @@ export async function finalizeSettlementOnChain(
 }
 
 /**
- * Admin resolution of an escalated or disputed patent case
+ * Autonomous resolution / appeal adjudication of an escalated or disputed patent case
  */
 export async function resolveEscalationOnChain(
   contractAddress: string,
   userAddress: string,
-  patentId: number,
+  patentId: number | string,
   resolution: 'INVALIDATE' | 'UPHOLD' | 'REFUND_SPLIT'
 ): Promise<string> {
   await ensureStudionet();
@@ -413,7 +471,7 @@ export async function resolveEscalationOnChain(
   const txHash = await client.writeContract({
     address: contractAddress as `0x${string}`,
     functionName: 'resolve_escalation',
-    args: [patentId, resolution],
+    args: [String(patentId), resolution],
     value: 0n,
   });
 
@@ -427,7 +485,7 @@ export async function resolveEscalationOnChain(
 export async function reclaimExpiredPatentOnChain(
   contractAddress: string,
   userAddress: string,
-  patentId: number
+  patentId: number | string
 ): Promise<string> {
   await ensureStudionet();
   const client = getGenLayerClient(userAddress);
@@ -435,7 +493,7 @@ export async function reclaimExpiredPatentOnChain(
   const txHash = await client.writeContract({
     address: contractAddress as `0x${string}`,
     functionName: 'reclaim_expired_patent',
-    args: [patentId],
+    args: [String(patentId)],
     value: 0n,
   });
 

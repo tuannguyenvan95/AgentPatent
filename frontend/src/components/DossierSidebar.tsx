@@ -17,7 +17,7 @@ import { formatGen, getStatusMeta } from '../utils/helpers';
 
 interface DossierSidebarProps {
   patents: PatentCaseData[];
-  selectedPatentId: number | null;
+  selectedPatentId: number | string | null;
   onSelectPatent: (patent: PatentCaseData) => void;
   onOpenRegisterModal: () => void;
   activeTab: 'all' | 'active' | 'in_exam' | 'settled';
