@@ -3,16 +3,14 @@ from genlayer import *
 from dataclasses import dataclass
 import json
 
-# Canonical GenVM transaction rollback error support
-if hasattr(gl, "vm") and hasattr(gl.vm, "UserError"):
-    gl.UserError = gl.vm.UserError
-elif not hasattr(gl, "UserError"):
-    gl.UserError = ValueError
+# Safe UserError definition without mutating gl namespace
+class UserError(Exception):
+    pass
 
 CANARY_TOKEN = "CANARY_AGENT_PATENT_V2"
-COOLING_OFF_SECONDS = 300       # 5 minutes manipulation-resistant cooling-off window
-DEFAULT_PATENT_DURATION = 86400 # 24 hours default protection
-STALL_TIMEOUT_SECONDS = 3600    # 1 hour evaluation timeout
+COOLING_OFF_SECONDS = u256(300)       # 5 minutes manipulation-resistant cooling-off window
+DEFAULT_PATENT_DURATION = u256(86400) # 24 hours default protection
+STALL_TIMEOUT_SECONDS = u256(3600)    # 1 hour evaluation timeout
 
 # Patent Status Codes
 STATUS_ACTIVE_PROTECTED = u8(0)     # Under active patent protection, open to challenge
@@ -33,25 +31,6 @@ def _addr_str(addr: Address) -> str:
         return str(addr).lower()
 
 
-def _get_sender() -> Address:
-    """Safely obtain transaction sender across GenVM runtime versions."""
-    try:
-        if hasattr(gl, "message") and hasattr(gl.message, "sender_address") and gl.message.sender_address:
-            return gl.message.sender_address
-    except Exception:
-        pass
-    try:
-        if hasattr(gl, "message") and hasattr(gl.message, "sender") and gl.message.sender:
-            return gl.message.sender
-    except Exception:
-        pass
-    try:
-        return gl.message.sender_address
-    except Exception:
-        pass
-    return None
-
-
 def _current_timestamp() -> u256:
     """Derives manipulation-resistant execution timestamp from consensus block context."""
     from datetime import datetime
@@ -63,14 +42,6 @@ def _current_timestamp() -> u256:
                 ts = int(datetime.fromisoformat(dt_str).timestamp())
                 if ts > 0:
                     return u256(ts)
-    except Exception:
-        pass
-    try:
-        if hasattr(gl, "message") and hasattr(gl.message, "datetime") and gl.message.datetime:
-            dt_str = str(gl.message.datetime).strip().replace("Z", "+00:00")
-            ts = int(datetime.fromisoformat(dt_str).timestamp())
-            if ts > 0:
-                return u256(ts)
     except Exception:
         pass
     return u256(1700000000)
@@ -107,8 +78,6 @@ class Contract(gl.Contract):
     """
     AgentPatent: Autonomous AI Research Prior Art & Patent Collision Court
     Target Network: GenLayer studionet (Chain ID: 61999 / 0xF22F)
-    Features: Multi-Role Permissions, Escrow Preservation, Manipulation-Resistant Timestamps,
-              Appellate Autonomous AI Jury Court, Zero Admin Backdoors.
     """
     patents: TreeMap[str, PatentCase]
     patent_ids: DynArray[str]
@@ -149,31 +118,31 @@ class Contract(gl.Contract):
         return raw_key
 
     @gl.public.write.payable
-    def register_patent_claim(self, patent_title: str, novelty_claims: str, duration_seconds: int) -> str:
+    def register_patent_claim(self, patent_title: str, novelty_claims: str, duration_seconds: u64) -> str:
         deposit = bigint(gl.message.value)
         if deposit <= bigint(0):
-            raise gl.UserError("Patent validity escrow deposit must be greater than 0 GEN.")
+            raise UserError("Patent validity escrow deposit must be greater than 0 GEN.")
 
         clean_title = self._sanitize_input(str(patent_title).strip())
         if not clean_title or len(clean_title) < 5:
-            raise gl.UserError("Patent title must be at least 5 characters.")
+            raise UserError("Patent title must be at least 5 characters.")
 
         clean_claims = self._sanitize_input(str(novelty_claims).strip())
         if not clean_claims or len(clean_claims) < 20:
-            raise gl.UserError("Novelty claims and inventive specification must be at least 20 characters.")
+            raise UserError("Novelty claims and inventive specification must be at least 20 characters.")
 
-        dur = u256(duration_seconds if duration_seconds > 0 else 86400)
+        dur = u256(int(duration_seconds)) if int(duration_seconds) > 0 else DEFAULT_PATENT_DURATION
         now = _current_timestamp()
 
         self.patent_counter = self.patent_counter + u64(1)
         patent_id = f"patent-{int(self.patent_counter)}"
         expires_at = now + dur
-        sender = _get_sender()
+        sender = gl.message.sender_address
 
         new_patent = PatentCase(
             patent_id=patent_id,
             inventor=sender,
-            challenger=sender,  # Initially set to inventor; status 0 indicates uncontested
+            challenger=sender,
             dispute_initiator=sender,
             escrow_deposit=deposit,
             challenger_bond=bigint(0),
@@ -204,23 +173,23 @@ class Contract(gl.Contract):
     def challenge_prior_art(self, patent_id: str, prior_art_url: str) -> None:
         pid = self._resolve_pid(patent_id)
         if pid not in self.patents:
-            raise gl.UserError(f"Patent case {patent_id} does not exist.")
+            raise UserError(f"Patent case {patent_id} does not exist.")
 
         p = self.patents[pid]
         if p.status != STATUS_ACTIVE_PROTECTED:
-            raise gl.UserError("Only active patents under protection can be challenged.")
+            raise UserError("Only active patents under protection can be challenged.")
 
-        sender = _get_sender()
+        sender = gl.message.sender_address
         if _addr_str(sender) == _addr_str(p.inventor):
-            raise gl.UserError("Inventor cannot challenge their own patent.")
+            raise UserError("Inventor cannot challenge their own patent.")
 
         now = _current_timestamp()
         if now > p.expires_at_time:
-            raise gl.UserError("Cannot challenge: Patent protection duration has already expired.")
+            raise UserError("Cannot challenge: Patent protection duration has already expired.")
 
         clean_url = str(prior_art_url).strip()
         if not clean_url.startswith("http://") and not clean_url.startswith("https://"):
-            raise gl.UserError("Valid public prior art URL (http/https) is required.")
+            raise UserError("Valid public prior art URL (http/https) is required.")
 
         min_bond = p.escrow_deposit // bigint(10)
         if min_bond == bigint(0):
@@ -228,7 +197,7 @@ class Contract(gl.Contract):
 
         staked = bigint(gl.message.value)
         if staked < min_bond:
-            raise gl.UserError(f"Must stake at least 10% challenge bond ({int(min_bond)} wei).")
+            raise UserError(f"Must stake at least 10% challenge bond ({int(min_bond)} wei).")
 
         p.challenger = sender
         p.prior_art_url = clean_url
@@ -243,11 +212,11 @@ class Contract(gl.Contract):
     def adjudicate_collision(self, patent_id: str) -> None:
         pid = self._resolve_pid(patent_id)
         if pid not in self.patents:
-            raise gl.UserError(f"Patent case {patent_id} does not exist.")
+            raise UserError(f"Patent case {patent_id} does not exist.")
 
         p = self.patents[pid]
         if p.status != STATUS_IN_EXAMINATION:
-            raise gl.UserError("Patent case is not awaiting collision adjudication.")
+            raise UserError("Patent case is not awaiting collision adjudication.")
 
         art_url = p.prior_art_url
         title = p.patent_title
@@ -361,7 +330,6 @@ Respond ONLY with valid JSON without markdown fences:
                 return False
 
             mine = leader_fn()
-            # Compare verdict only for deterministic consensus
             return mine["verdict"] == leader["verdict"]
 
         adjudication_res = gl.vm.run_nondet(leader_fn, validator_fn)
@@ -383,22 +351,21 @@ Respond ONLY with valid JSON without markdown fences:
 
     @gl.public.write.payable
     def appeal_verdict(self, patent_id: str, new_evidence_url: str) -> None:
-        """Contests the initial examination verdict within the 5-minute cooling-off window with a 10% bond."""
         pid = self._resolve_pid(patent_id)
         if pid not in self.patents:
-            raise gl.UserError(f"Patent case {patent_id} does not exist.")
+            raise UserError(f"Patent case {patent_id} does not exist.")
 
         p = self.patents[pid]
         if p.status != STATUS_AWAITING_PAYOUT:
-            raise gl.UserError("Can only appeal cases in AWAITING_PAYOUT status.")
+            raise UserError("Can only appeal cases in AWAITING_PAYOUT status.")
 
-        sender = _get_sender()
+        sender = gl.message.sender_address
         if _addr_str(sender) != _addr_str(p.inventor) and _addr_str(sender) != _addr_str(p.challenger):
-            raise gl.UserError("Only inventor or challenger can raise an appeal.")
+            raise UserError("Only inventor or challenger can raise an appeal.")
 
         now = _current_timestamp()
-        if now > (p.audit_completed_time + u256(COOLING_OFF_SECONDS)):
-            raise gl.UserError("Appeal challenge window (5 minutes) has expired.")
+        if now > (p.audit_completed_time + COOLING_OFF_SECONDS):
+            raise UserError("Appeal challenge window (5 minutes) has expired.")
 
         required_bond = (p.escrow_deposit * bigint(10)) // bigint(100)
         if required_bond == bigint(0):
@@ -406,11 +373,11 @@ Respond ONLY with valid JSON without markdown fences:
 
         staked_bond = bigint(gl.message.value)
         if staked_bond < required_bond:
-            raise gl.UserError(f"Must stake at least 10% appeal bond ({int(required_bond)} wei).")
+            raise UserError(f"Must stake at least 10% appeal bond ({int(required_bond)} wei).")
 
         clean_url = str(new_evidence_url).strip()
         if not clean_url.startswith("http://") and not clean_url.startswith("https://"):
-            raise gl.UserError("Valid rebuttal/appeal evidence URL (http/https) is required.")
+            raise UserError("Valid rebuttal/appeal evidence URL (http/https) is required.")
 
         p.status = STATUS_DISPUTED
         p.dispute_initiator = sender
@@ -428,14 +395,13 @@ Respond ONLY with valid JSON without markdown fences:
 
     @gl.public.write
     def adjudicate_appeal(self, patent_id: str) -> None:
-        """High Court AI Jury reviews appealed evidence and delivers definitive settlement."""
         pid = self._resolve_pid(patent_id)
         if pid not in self.patents:
-            raise gl.UserError(f"Patent case {patent_id} does not exist.")
+            raise UserError(f"Patent case {patent_id} does not exist.")
 
         p = self.patents[pid]
         if p.status not in (STATUS_DISPUTED, STATUS_ESCALATED):
-            raise gl.UserError("Patent case is not in active dispute or escalation.")
+            raise UserError("Patent case is not in active dispute or escalation.")
 
         response_url = p.appeal_evidence_url if p.appeal_evidence_url else p.prior_art_url
         title = p.patent_title
@@ -538,7 +504,6 @@ Output JSON with "canary": "{CANARY_TOKEN}":
             final_verdict = p.initial_verdict
             appellant_won = False
 
-        # Dispute bond routed to the winner
         if appellant_won:
             gl.get_contract_at(appellant).emit_transfer(value=u256(d_bond))
         else:
@@ -547,7 +512,6 @@ Output JSON with "canary": "{CANARY_TOKEN}":
         p.verdict = final_verdict
         p.reason = f"{'Appeal upheld' if appellant_won else 'Appeal dismissed, initial ruling restored'}. {appeal_res['reason']}"
 
-        # Settle main escrow and challenge bond
         main_pool = escrow_val + c_bond
         if final_verdict == "PATENT_INVALIDATED":
             p.status = STATUS_INVALIDATED_SLASHED
@@ -558,22 +522,22 @@ Output JSON with "canary": "{CANARY_TOKEN}":
 
     @gl.public.write
     def resolve_escalation(self, patent_id: str, resolution: str) -> None:
-        """Decentralized Appellate AI Court adjudication (replaces deprecated centralized admin backdoor)."""
+        """Decentralized Appellate AI Court adjudication."""
         return self.adjudicate_appeal(patent_id)
 
     @gl.public.write
     def finalize_settlement(self, patent_id: str) -> None:
         pid = self._resolve_pid(patent_id)
         if pid not in self.patents:
-            raise gl.UserError(f"Patent case {patent_id} does not exist.")
+            raise UserError(f"Patent case {patent_id} does not exist.")
 
         p = self.patents[pid]
         if p.status != STATUS_AWAITING_PAYOUT:
-            raise gl.UserError("Patent case is not awaiting settlement payout.")
+            raise UserError("Patent case is not awaiting settlement payout.")
 
         now = _current_timestamp()
-        if now <= (p.audit_completed_time + u256(COOLING_OFF_SECONDS)):
-            raise gl.UserError("Cooling-off dispute window (5 minutes) has not elapsed yet.")
+        if now <= (p.audit_completed_time + COOLING_OFF_SECONDS):
+            raise UserError("Cooling-off dispute window (5 minutes) has not elapsed yet.")
 
         escrow_val = p.escrow_deposit
         bond_val = p.challenger_bond
@@ -594,18 +558,18 @@ Output JSON with "canary": "{CANARY_TOKEN}":
     def reclaim_expired_patent(self, patent_id: str) -> None:
         pid = self._resolve_pid(patent_id)
         if pid not in self.patents:
-            raise gl.UserError(f"Patent case {patent_id} does not exist.")
+            raise UserError(f"Patent case {patent_id} does not exist.")
 
         p = self.patents[pid]
-        sender = _get_sender()
+        sender = gl.message.sender_address
         if _addr_str(sender) != _addr_str(p.inventor):
-            raise gl.UserError("Only the patent inventor can reclaim escrowed funds.")
+            raise UserError("Only the patent inventor can reclaim escrowed funds.")
 
         now = _current_timestamp()
 
         if p.status == STATUS_IN_EXAMINATION:
-            if now < (p.examination_started_time + u256(STALL_TIMEOUT_SECONDS)):
-                raise gl.UserError("Cannot reclaim: Patent is undergoing active prior art examination.")
+            if now < (p.examination_started_time + STALL_TIMEOUT_SECONDS):
+                raise UserError("Cannot reclaim: Patent is undergoing active prior art examination.")
             dep = p.challenger_bond
             p.challenger_bond = bigint(0)
             if dep > bigint(0):
@@ -613,7 +577,6 @@ Output JSON with "canary": "{CANARY_TOKEN}":
                 gl.get_contract_at(p.challenger).emit_transfer(value=u256(dep))
 
         elif p.status == STATUS_ESCALATED:
-            # Safe recovery for stalled/unparseable AI consensus
             dep = p.challenger_bond
             p.challenger_bond = bigint(0)
             if dep > bigint(0):
@@ -622,9 +585,9 @@ Output JSON with "canary": "{CANARY_TOKEN}":
 
         elif p.status == STATUS_ACTIVE_PROTECTED:
             if now < p.expires_at_time:
-                raise gl.UserError("Cannot reclaim: Patent protection duration has not yet expired.")
+                raise UserError("Cannot reclaim: Patent protection duration has not yet expired.")
         else:
-            raise gl.UserError("Patent case is already settled or under active review.")
+            raise UserError("Patent case is already settled or under active review.")
 
         p.status = STATUS_EXPIRED_RECLAIMED
         p.verdict = "EXPIRED_UNCONTESTED"
@@ -640,7 +603,7 @@ Output JSON with "canary": "{CANARY_TOKEN}":
     def get_patent(self, patent_id: str) -> str:
         pid = self._resolve_pid(patent_id)
         if pid not in self.patents:
-            raise gl.UserError(f"Patent case {patent_id} does not exist.")
+            raise UserError(f"Patent case {patent_id} does not exist.")
 
         p = self.patents[pid]
         data = {
@@ -671,24 +634,27 @@ Output JSON with "canary": "{CANARY_TOKEN}":
         return json.dumps(data)
 
     @gl.public.view
-    def get_patent_count(self) -> int:
-        return len(self.patent_ids)
+    def get_patent_count(self) -> u64:
+        return u64(len(self.patent_ids))
 
     @gl.public.view
-    def get_patent_id_by_index(self, idx: int) -> str:
-        if idx < 0 or idx >= len(self.patent_ids):
-            raise gl.UserError("Index out of bounds.")
-        return self.patent_ids[idx]
+    def get_patent_id_by_index(self, idx: u64) -> str:
+        i = int(idx)
+        if i < 0 or i >= len(self.patent_ids):
+            raise UserError("Index out of bounds.")
+        return self.patent_ids[i]
 
     @gl.public.view
-    def get_patents_paginated(self, offset: int, limit: int) -> str:
+    def get_patents_paginated(self, offset: u64, limit: u64) -> str:
+        off = int(offset)
+        lim = int(limit)
         total = len(self.patent_ids)
-        if offset < 0 or offset >= total or limit <= 0:
+        if off < 0 or off >= total or lim <= 0:
             return json.dumps([])
 
-        end = min(offset + limit, total)
+        end = min(off + lim, total)
         patents_list = []
-        for i in range(offset, end):
+        for i in range(off, end):
             pid = self.patent_ids[i]
             if pid in self.patents:
                 p = self.patents[pid]
