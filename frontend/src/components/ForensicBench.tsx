@@ -28,6 +28,7 @@ interface ForensicBenchProps {
   onOpenChallenge: (patent: PatentCaseData) => void;
   onAdjudicate: (patentId: number | string) => void;
   actionLoading: boolean;
+  userAddress?: string;
 }
 
 export const ForensicBench: React.FC<ForensicBenchProps> = ({
@@ -35,6 +36,7 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
   onOpenChallenge,
   onAdjudicate,
   actionLoading,
+  userAddress,
 }) => {
   if (!patent) {
     return (
@@ -60,6 +62,11 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
   const isUpheld = patent.verdict === 'PATENT_UPHELD_VALID';
   const hasPriorArt = !!patent.prior_art_url;
   const isPending = patent.status === 1;
+  const isInventor = Boolean(
+    userAddress &&
+    patent.inventor &&
+    userAddress.toLowerCase() === patent.inventor.toLowerCase()
+  );
 
   // Collision Radar calculations for SVG Circle
   const radius = 38;
@@ -234,7 +241,7 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
               </div>
             </div>
             <span className="font-mono text-[10px] text-rose-400/70">
-              Challenger: {truncateAddress(patent.challenger)}
+              Challenger: {hasPriorArt ? truncateAddress(patent.challenger) : 'Uncontested (Open)'}
             </span>
           </div>
 
@@ -297,12 +304,27 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
               <p className="text-xs font-mono text-slate-400 mt-1 max-w-xs">
                 This patent claim remains uncontested in the GenLayer High Court Rolls. Any researcher or AI Agent may challenge by staking a 10% bond.
               </p>
-              <button
-                onClick={() => onOpenChallenge(patent)}
-                className="mt-4 px-4 py-2 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-white bg-rose-950/80 hover:bg-rose-900 border border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all"
-              >
-                Stake Bond & File Collision Audit
-              </button>
+              {isInventor ? (
+                <div className="mt-4 flex flex-col items-center gap-1.5 w-full max-w-xs">
+                  <button
+                    disabled
+                    className="w-full px-4 py-2 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-slate-400 bg-slate-800/80 border border-slate-700 cursor-not-allowed opacity-75"
+                    title="Inventor cannot challenge their own patent. Please switch wallet in MetaMask."
+                  >
+                    Self-Challenge Barred (Inventor)
+                  </button>
+                  <p className="text-[10px] font-mono text-amber-400">
+                    Switch to Account 2 in MetaMask to challenge as a competitor
+                  </p>
+                </div>
+              ) : (
+                <button
+                  onClick={() => onOpenChallenge(patent)}
+                  className="mt-4 px-4 py-2 rounded-lg text-xs font-space font-bold uppercase tracking-wider text-white bg-rose-950/80 hover:bg-rose-900 border border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all"
+                >
+                  Stake Bond & File Collision Audit
+                </button>
+              )}
             </div>
           )}
 

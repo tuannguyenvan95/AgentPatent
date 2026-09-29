@@ -387,6 +387,7 @@ export const App: React.FC = () => {
           onOpenChallenge={(p) => setChallengeTarget(p)}
           onAdjudicate={handleAdjudicateCollision}
           actionLoading={actionLoading}
+          userAddress={userAddress}
         />
 
         {/* Right Column: Litigation Action Chamber & Vault */}
