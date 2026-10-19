@@ -6,7 +6,7 @@ from genlayer_py import create_client, create_account, studionet
 from eth_account import Account
 
 INVENTOR_PK = "0x1b807b1df022a40f872596b11565e6b6856547dc66996bd3d5a85b376ea3a0ef"
-CONTRACT = "0xD91f5095151ab72DfF3d76905ffA49238cCa340f"
+CONTRACT = "0xff6f667739073c633a1C549D264cF722CFe1688c"
 
 def main():
     print("=" * 70, flush=True)

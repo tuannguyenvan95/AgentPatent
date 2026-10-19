@@ -8,7 +8,7 @@
 - 🌐 **Live Web3 dApp:** [https://agentpatent.vercel.app](https://agentpatent.vercel.app)
 - 🐙 **GitHub Repository:** [https://github.com/tuannguyenvan95/AgentPatent](https://github.com/tuannguyenvan95/AgentPatent)
 - ⚙️ **GenLayer Network:** Studionet (Chain ID: `61999` / `0xF22F`, RPC: `https://studio.genlayer.com/api`)
-- 📜 **Deployed Contract:** [`0xD91f5095151ab72DfF3d76905ffA49238cCa340f`](https://studio.genlayer.com)
+- 📜 **Deployed Contract:** [`0xff6f667739073c633a1C549D264cF722CFe1688c`](https://studio.genlayer.com)
 
 > **One-Liner (Form Ready — 112 chars):**  
 > Autonomous AI research prior art and patent collision court powered by GenLayer decentralized subjective consensus.

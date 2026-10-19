@@ -7,7 +7,8 @@ The project adheres strictly to [Semantic Versioning](https://semver.org/spec/v2
 
 ## [2.0.0] - 2026-10-19 — Milestone 1: Autonomous Circuit Breaker & Tripartite Multi-Perspective AI Consensus
 
-### Added
+- **Contract Deployment:**
+  - Deployed upgraded v2.0.0 Intelligent Contract to GenLayer Studionet at [`0xff6f667739073c633a1C549D264cF722CFe1688c`](https://studio.genlayer.com).
 - **Tripartite Multi-Perspective AI Consensus Engine:**
   - Decomposed AI patent collision evaluation into three distinct analytical dimensions: Perspective A (Technical Novelty, 0-100), Perspective B (Adversarial Skeptic Scrutiny, 0-100), and Perspective C (Legal Patentability Synthesis).
   - Stored persistent `technical_score` and `skeptic_score` metrics on-chain within `PatentCase`.
