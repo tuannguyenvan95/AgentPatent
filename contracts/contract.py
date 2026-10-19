@@ -11,6 +11,8 @@ CANARY_TOKEN = "CANARY_AGENT_PATENT_V2"
 COOLING_OFF_SECONDS = u256(300)       # 5 minutes manipulation-resistant cooling-off window
 DEFAULT_PATENT_DURATION = u256(86400) # 24 hours default protection
 STALL_TIMEOUT_SECONDS = u256(3600)    # 1 hour evaluation timeout
+BREAKER_COOLDOWN_SECONDS = u256(900)  # 15 minutes autonomous cooldown window
+MAX_CANARY_FAILURES = u32(3)          # Trips circuit breaker after 3 consecutive canary violations
 
 # Patent Status Codes
 STATUS_ACTIVE_PROTECTED = u8(0)     # Under active patent protection, open to challenge
@@ -68,6 +70,8 @@ class PatentCase:
     reason: str                    # Technical rationale from Patent Examination Board
     confidence: u8                 # 0 - 100: Validator consensus confidence
     overlap_score: u8              # 0 - 100: Degree of technical equivalence with prior art
+    technical_score: u8            # 0 - 100: Perspective A technical novelty score
+    skeptic_score: u8              # 0 - 100: Perspective B adversarial skeptic overlap score
     created_at_time: u256          # Deterministic creation timestamp
     expires_at_time: u256          # Deterministic expiration timestamp
     examination_started_time: u256 # Examination initiation timestamp
@@ -84,11 +88,25 @@ class Contract(gl.Contract):
     total_patent_locked: bigint
     total_disputes_resolved: u32
     patent_counter: u64
+    circuit_breaker_active: bool
+    last_halt_timestamp: u256
+    canary_failure_count: u32
 
     def __init__(self):
         self.total_patent_locked = bigint(0)
         self.total_disputes_resolved = u32(0)
         self.patent_counter = u64(0)
+        self.circuit_breaker_active = False
+        self.last_halt_timestamp = u256(0)
+        self.canary_failure_count = u32(0)
+
+    def _check_and_update_circuit_breaker(self) -> None:
+        """Autonomously resets circuit breaker if cooldown duration has expired."""
+        if self.circuit_breaker_active:
+            now = _current_timestamp()
+            if now > (self.last_halt_timestamp + BREAKER_COOLDOWN_SECONDS):
+                self.circuit_breaker_active = False
+                self.canary_failure_count = u32(0)
 
     def _sanitize_input(self, text: str) -> str:
         clean = str(text)
@@ -119,6 +137,10 @@ class Contract(gl.Contract):
 
     @gl.public.write.payable
     def register_patent_claim(self, patent_title: str, novelty_claims: str, duration_seconds: u64) -> str:
+        self._check_and_update_circuit_breaker()
+        if self.circuit_breaker_active:
+            raise UserError("Protocol Circuit Breaker active: Operations temporarily paused due to detected anomaly. Autonomous cooldown in progress.")
+
         deposit = bigint(gl.message.value)
         if deposit <= bigint(0):
             raise UserError("Patent validity escrow deposit must be greater than 0 GEN.")
@@ -157,6 +179,8 @@ class Contract(gl.Contract):
             reason="Patent active. Under on-chain novelty protection awaiting challenge or expiration.",
             confidence=u8(0),
             overlap_score=u8(0),
+            technical_score=u8(0),
+            skeptic_score=u8(0),
             created_at_time=now,
             expires_at_time=expires_at,
             examination_started_time=u256(0),
@@ -171,6 +195,10 @@ class Contract(gl.Contract):
 
     @gl.public.write.payable
     def challenge_prior_art(self, patent_id: str, prior_art_url: str) -> None:
+        self._check_and_update_circuit_breaker()
+        if self.circuit_breaker_active:
+            raise UserError("Protocol Circuit Breaker active: Operations temporarily paused due to detected anomaly. Autonomous cooldown in progress.")
+
         pid = self._resolve_pid(patent_id)
         if pid not in self.patents:
             raise UserError(f"Patent case {patent_id} does not exist.")
@@ -235,6 +263,8 @@ class Contract(gl.Contract):
                 return {
                     "canary": CANARY_TOKEN,
                     "verdict": "PATENT_UPHELD_VALID",
+                    "technical_score": 95,
+                    "skeptic_score": 5,
                     "confidence": 100,
                     "overlap_score": 0,
                     "reason": "Could not access prior art URL (404/network failure). Challenge dismissed."
@@ -243,8 +273,20 @@ class Contract(gl.Contract):
             sanitized_art = sanitizer(raw_art)
             truncated_art = sanitized_art[:6500] if len(sanitized_art) > 6500 else sanitized_art
 
-            prompt = f"""You are the Chief Examiner of the AgentPatent Board on GenLayer.
-Evaluate whether the submitted prior art anticipates or renders obvious the claimed patent.
+            prompt = f"""You are the Chief Examiner of the AgentPatent Tripartite Examination Board on GenLayer.
+Evaluate this patent claim against submitted prior art using tripartite multi-perspective analysis:
+
+1. PERSPECTIVE A (TECHNICAL NOVELTY):
+- Evaluate genuine architectural, mathematical, and algorithmic novelty.
+- Assign technical_novelty_score (0-100): High score indicates clear technical advancement.
+
+2. PERSPECTIVE B (ADVERSARIAL SKEPTIC):
+- Scrutinize whether claims are mere paraphrasing, trivial abstractions, or thin wrappers over prior art.
+- Assign skeptic_overlap_score (0-100): High score indicates prior art anticipate or preempts the claims.
+
+3. PERSPECTIVE C (LEGAL PATENTABILITY SYNTHESIS):
+- If skeptic_overlap_score >= 70 or technical_novelty_score < 30: Output "PATENT_INVALIDATED".
+- If skeptic_overlap_score < 70 and technical_novelty_score >= 30: Output "PATENT_UPHELD_VALID".
 
 CHALLENGED PATENT SPECIFICATION:
 <patent_title>{title}</patent_title>
@@ -253,11 +295,6 @@ CHALLENGED PATENT SPECIFICATION:
 EXTRACTED PRIOR ART EVIDENCE:
 <prior_art_document>{truncated_art}</prior_art_document>
 
-EXAMINATION CRITERIA:
-1. Novelty & Inventive Step: Compute overlap_score (0-100).
-2. If overlap_score >= 75: Output "PATENT_INVALIDATED".
-3. If overlap_score < 75: Output "PATENT_UPHELD_VALID".
-
 SECURITY CANARY:
 Include "canary": "{CANARY_TOKEN}" in your JSON response.
 
@@ -265,9 +302,11 @@ Respond ONLY with valid JSON without markdown fences:
 {{
   "canary": "{CANARY_TOKEN}",
   "verdict": "PATENT_INVALIDATED"|"PATENT_UPHELD_VALID",
+  "technical_novelty_score": <0-100>,
+  "skeptic_overlap_score": <0-100>,
   "confidence": <0-100>,
   "overlap_score": <0-100>,
-  "reason": "<rigorous examination justification>"
+  "reason": "<rigorous multi-perspective examination justification>"
 }}"""
 
             raw_res = gl.nondet.exec_prompt(prompt, response_format="json")
@@ -285,6 +324,8 @@ Respond ONLY with valid JSON without markdown fences:
                 return {
                     "canary": CANARY_TOKEN,
                     "verdict": "ESCALATED",
+                    "technical_score": 0,
+                    "skeptic_score": 0,
                     "confidence": 0,
                     "overlap_score": 0,
                     "reason": "AI examination output format invalid or canary token mismatch."
@@ -304,17 +345,22 @@ Respond ONLY with valid JSON without markdown fences:
             if conf_val < 60:
                 verdict_str = "ESCALATED"
 
+            tech_val = _clean_num(parsed.get("technical_novelty_score"), 80 if verdict_str == "PATENT_UPHELD_VALID" else 20)
+            skep_val = _clean_num(parsed.get("skeptic_overlap_score"), 85 if verdict_str == "PATENT_INVALIDATED" else 15)
+
             score_val = _clean_num(
                 parsed.get("overlap_score"),
-                85 if verdict_str == "PATENT_INVALIDATED" else 20
+                skep_val
             )
 
             return {
                 "canary": CANARY_TOKEN,
                 "verdict": verdict_str,
+                "technical_score": tech_val,
+                "skeptic_score": skep_val,
                 "confidence": conf_val,
                 "overlap_score": score_val,
-                "reason": str(parsed.get("reason", "Patent examination concluded."))
+                "reason": str(parsed.get("reason", "Tripartite patent examination concluded."))
             }
 
         def validator_fn(leader_res) -> bool:
@@ -340,14 +386,22 @@ Respond ONLY with valid JSON without markdown fences:
         p.reason = adjudication_res["reason"]
         p.confidence = u8(int(adjudication_res["confidence"]))
         p.overlap_score = u8(int(adjudication_res["overlap_score"]))
+        p.technical_score = u8(int(adjudication_res.get("technical_score", 0)))
+        p.skeptic_score = u8(int(adjudication_res.get("skeptic_score", 0)))
 
         now = _current_timestamp()
 
         if verdict == "ESCALATED":
             p.status = STATUS_ESCALATED
+            self.canary_failure_count = self.canary_failure_count + u32(1)
+            if self.canary_failure_count >= MAX_CANARY_FAILURES:
+                self.circuit_breaker_active = True
+                self.last_halt_timestamp = now
         else:
             p.status = STATUS_AWAITING_PAYOUT
             p.audit_completed_time = now
+            if self.canary_failure_count > u32(0):
+                self.canary_failure_count = u32(0)
 
     @gl.public.write.payable
     def appeal_verdict(self, patent_id: str, new_evidence_url: str) -> None:
@@ -624,6 +678,8 @@ Output JSON with "canary": "{CANARY_TOKEN}":
             "reason": p.reason,
             "confidence": int(p.confidence),
             "overlap_score": int(p.overlap_score),
+            "technical_score": int(p.technical_score),
+            "skeptic_score": int(p.skeptic_score),
             "created_at_time": str(p.created_at_time),
             "expires_at_time": str(p.expires_at_time),
             "examination_started_time": str(p.examination_started_time),
@@ -676,6 +732,8 @@ Output JSON with "canary": "{CANARY_TOKEN}":
                     "reason": p.reason,
                     "confidence": int(p.confidence),
                     "overlap_score": int(p.overlap_score),
+                    "technical_score": int(p.technical_score),
+                    "skeptic_score": int(p.skeptic_score),
                     "created_at_time": str(p.created_at_time),
                     "expires_at_time": str(p.expires_at_time),
                     "examination_started_time": str(p.examination_started_time),
@@ -709,6 +767,8 @@ Output JSON with "canary": "{CANARY_TOKEN}":
                     "reason": p.reason,
                     "confidence": int(p.confidence),
                     "overlap_score": int(p.overlap_score),
+                    "technical_score": int(p.technical_score),
+                    "skeptic_score": int(p.skeptic_score),
                     "created_at_time": str(p.created_at_time),
                     "expires_at_time": str(p.expires_at_time),
                     "examination_started_time": str(p.examination_started_time),
@@ -734,3 +794,18 @@ Output JSON with "canary": "{CANARY_TOKEN}":
             "active_examinations": active_exams,
         }
         return json.dumps(data)
+
+    @gl.public.view
+    def get_security_telemetry(self) -> str:
+        self._check_and_update_circuit_breaker()
+        telemetry = {
+            "circuit_breaker_active": bool(self.circuit_breaker_active),
+            "canary_failures": int(self.canary_failure_count),
+            "last_halt_timestamp": str(self.last_halt_timestamp),
+            "total_patent_locked": str(self.total_patent_locked),
+            "total_disputes_resolved": int(self.total_disputes_resolved),
+            "protocol_health": "NOMINAL" if not self.circuit_breaker_active else "CIRCUIT_BREAKER_HALTED",
+            "autonomous_mode": "ZERO_ADMIN_DECENTRALIZED",
+            "canary_watchdog": CANARY_TOKEN,
+        }
+        return json.dumps(telemetry)

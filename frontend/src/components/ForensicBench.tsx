@@ -453,6 +453,36 @@ export const ForensicBench: React.FC<ForensicBenchProps> = ({
               "{patent.reason}"
             </div>
 
+            {/* Tripartite Multi-Perspective AI Deliberation Matrix */}
+            <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 font-mono">
+              <div className="p-3 rounded-xl bg-[#070A11] border border-cyan-500/30">
+                <div className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                  <span>PERSPECTIVE A</span>
+                  <span className="text-cyan-300 font-bold">{patent.technical_score ?? (isUpheld ? 85 : 20)}%</span>
+                </div>
+                <div className="text-xs font-bold text-slate-100 mt-1">Technical Novelty</div>
+                <p className="text-[10px] text-slate-400 mt-0.5">Algorithmic & mathematical distinctness</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#070A11] border border-amber-500/30">
+                <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                  <span>PERSPECTIVE B</span>
+                  <span className="text-amber-300 font-bold">{patent.skeptic_score ?? (isInvalidated ? 85 : 15)}%</span>
+                </div>
+                <div className="text-xs font-bold text-slate-100 mt-1">Adversarial Skeptic</div>
+                <p className="text-[10px] text-slate-400 mt-0.5">Paraphrasing & trivial wrapper scrutiny</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#070A11] border border-emerald-500/30">
+                <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                  <span>PERSPECTIVE C</span>
+                  <span className="text-emerald-300 font-bold">{patent.confidence}% Concord</span>
+                </div>
+                <div className="text-xs font-bold text-slate-100 mt-1">Legal Synthesis</div>
+                <p className="text-[10px] text-slate-400 mt-0.5">Multi-validator judicial consensus</p>
+              </div>
+            </div>
+
             {/* Cooling-off / Dispute status banner */}
             {patent.status === 2 && (
               <div className="mt-3 p-3 bg-indigo-950/40 border border-indigo-500/50 rounded-xl text-xs text-indigo-200 flex items-center justify-between font-mono">

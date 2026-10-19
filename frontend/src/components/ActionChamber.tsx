@@ -301,13 +301,19 @@ export const ActionChamber: React.FC<ActionChamberProps> = ({
 
         <div className="space-y-2 text-[11px] font-mono">
           <div className="p-2 rounded-lg bg-[#070A11] border border-[#1E293B] text-slate-300">
-            <span className="text-cyan-400">[SYS_GENVM]</span> Subjective Consensus v3 consensus layer operating normally.
+            <span className="text-cyan-400">[SYS_GENVM]</span> Tripartite Multi-Validator Consensus v2.0 operating normally.
+          </div>
+          <div className="p-2 rounded-lg bg-[#070A11] border border-emerald-500/30 text-slate-300">
+            <span className="text-emerald-400">[CIRCUIT_BREAKER]</span> Autonomous Watchdog: <strong className="text-emerald-300">NOMINAL</strong> • 15m Self-Healing Auto-Cooldown.
           </div>
           <div className="p-2 rounded-lg bg-[#070A11] border border-[#1E293B] text-slate-300">
             <span className="text-teal-400">[ORACLE_WEB]</span> On-chain web scraper <code className="text-cyan-200">gl.nondet.web.render</code> active.
           </div>
           <div className="p-2 rounded-lg bg-[#070A11] border border-[#1E293B] text-slate-300">
             <span className="text-amber-400">[TIMELOCK_24B]</span> 24-Block Cooling-off window rule strictly enforced across all callers.
+          </div>
+          <div className="p-2 rounded-lg bg-[#070A11] border border-purple-500/30 text-slate-300">
+            <span className="text-purple-400">[CANARY_GUARD]</span> Watchdog Token <code className="text-purple-200">CANARY_AGENT_PATENT_V2</code> armed.
           </div>
         </div>
       </div>

@@ -82,12 +82,24 @@ Dự án **AgentPatent** ứng dụng các tiến bộ bảo mật vượt bậc
 3. **Phòng chống tấn công Prompt Injection & Canary Token:**
    - Hàm `_sanitize_input` tự động thanh lọc các payload độc hại (jailbreak, system override).
    - Kiểm tra mã bảo mật ngầm `CANARY_AGENT_PATENT_V2`. Nếu LLM phản hồi thiếu canary hoặc độ tin cậy `< 60%`, hợp đồng tự động chuyển sang `STATUS_ESCALATED` để bảo vệ 100% tài sản trong quỹ.
-4. **Bảo toàn Escrow (`total_patent_locked`):**
+4. **Autonomous Protocol Circuit Breaker & Tự Chữa Lành (Track 4.6 Autonomous Protocols):**
+   - Khi phát hiện 3 lần vi phạm canary token liên tiếp (`MAX_CANARY_FAILURES = 3`), hợp đồng tự động ngắt (`circuit_breaker_active = True`), đình chỉ tạm thời các lệnh đăng ký mới để bảo vệ quỹ escrow.
+   - Sau thời gian ân hạn làm nguội 15 phút (`BREAKER_COOLDOWN_SECONDS = 900`), hợp đồng **tự động phục hồi trạng thái bình thường (Self-Healing)** mà không cần bất kỳ khóa Admin nào can thiệp.
+5. **Đồng Thuận Phân Tích 3 Chiều (Tripartite Multi-Perspective AI Deliberation):**
+   - Bóc tách phân tích thành 3 chiều độc lập: Perspective A (Technical Novelty), Perspective B (Adversarial Skeptic Scrutiny), và Perspective C (Legal Patentability Synthesis) trước khi tổng hợp ra phán quyết.
+6. **Bảo toàn Escrow (`total_patent_locked`):**
    - Mọi khoản nạp/rút/phạt cọc đều được hạch toán chính xác tuyệt đối, ngăn chặn triệt để rủi ro double-spend hoặc re-entrancy.
 
 ---
 
-## 📜 4. Đặc tả Kỹ thuật Smart Contract (`contracts/contract.py`)
+## 📚 4. Tài Liệu Thiết Kế Chuyên Sâu (Milestone Documentation Pack)
+- 📐 [**ARCHITECTURE.md**](file:///c:/Users/Admin/Documents/genlayer/AgentPatent/ARCHITECTURE.md): Sơ đồ luồng dữ liệu Mermaid, máy trạng thái 8 bước, và cơ chế đồng thuận phân quyền.
+- 🛡️ [**SECURITY.md**](file:///c:/Users/Admin/Documents/genlayer/AgentPatent/SECURITY.md): Mô hình đe dọa (Threat Model), cơ chế Canary Token và Autonomous Circuit Breaker.
+- 📝 [**CHANGELOG.md**](file:///c:/Users/Admin/Documents/genlayer/AgentPatent/CHANGELOG.md): Lịch sử nâng cấp chi tiết theo chuẩn SemVer (v1.0.0 → v1.1.0 → v2.0.0).
+
+---
+
+## 📜 5. Đặc tả Kỹ thuật Smart Contract (`contracts/contract.py`)
 
 - **Pragma:** `# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }`
 - **Imports:** `from genlayer import *`, `from dataclasses import dataclass`
@@ -97,40 +109,45 @@ Dự án **AgentPatent** ứng dụng các tiến bộ bảo mật vượt bậc
 ### Bảng Phương Thức Smart Contract:
 | Phương thức | Quyền hạn | Mục đích |
 |---|---|---|
-| `register_patent_claim(title, claims, duration)` | Public (Payable) | Inventor nộp claims và khóa GEN bảo chứng tính nguyên bản. |
-| `challenge_prior_art(patent_id, url)` | Challenger (Payable) | Thách thức sáng chế, nộp URL Prior Art và stake cọc ≥10%. |
-| `adjudicate_collision(patent_id)` | Public | Kích hoạt AI Examination Board cào web và thẩm định kỹ thuật. |
+| `register_patent_claim(title, claims, duration)` | Public (Payable) | Inventor nộp claims và khóa GEN bảo chứng tính nguyên bản (có kiểm tra Circuit Breaker). |
+| `challenge_prior_art(patent_id, url)` | Challenger (Payable) | Thách thức sáng chế, nộp URL Prior Art và stake cọc ≥10% (có kiểm tra Circuit Breaker). |
+| `adjudicate_collision(patent_id)` | Public | Kích hoạt Tripartite Multi-Perspective AI Board cào web và thẩm định kỹ thuật 3 chiều. |
 | `appeal_verdict(patent_id, new_evidence_url)` | Inventor / Challenger (Payable) | Kháng nghị phán quyết trong cooling-off kèm URL bằng chứng phản biện và stake 10% bond. |
 | `adjudicate_appeal(patent_id)` | Public | Kích hoạt Hội đồng AI Phúc thẩm tối cao (Supreme Appellate AI Jury) giải quyết dứt điểm on-chain. |
 | `finalize_settlement(patent_id)` | Public | Giải ngân tiền dứt điểm sau khi hết 5 phút cooling-off mà không có kháng cáo. |
 | `reclaim_expired_patent(patent_id)` | Inventor | Rút lại 100% tiền bảo chứng khi hết hạn bảo vệ mà không có ai khiếu nại. |
-| `get_patent(patent_id)` | View | Xem chi tiết 1 hồ sơ sáng chế dạng JSON. |
+| `get_patent(patent_id)` | View | Xem chi tiết 1 hồ sơ sáng chế dạng JSON (bao gồm technical & skeptic scores). |
 | `get_all_patents()` | View | Lấy toàn bộ danh sách sáng chế phục vụ render frontend tức thì. |
 | `get_stats()` | View | Thống kê tổng quan hệ thống (Tổng escrow, số vụ đã giải quyết). |
+| `get_security_telemetry()` | View | Kiểm tra telemetry an ninh on-chain, trạng thái Circuit Breaker và số lần Canary failure. |
 
 ---
 
-## 🧪 5. Kết Quả Kiểm Thử (Pytest Suite)
+## 🧪 6. Kết Quả Kiểm Thử (Pytest Suite)
 
-Dự án có bộ test toàn diện 10/10 test cases kiểm tra cú pháp, types, đồng thuận ngữ nghĩa và toàn bộ chu trình máy trạng thái:
+Dự án có bộ test toàn diện 14/14 test cases kiểm tra cú pháp, types, đồng thuận ngữ nghĩa, máy trạng thái, và autonomous circuit breaker:
 
 ```bash
 python -m pytest tests/ -v
 ```
 
 ```text
-tests/test_agentpatent.py::test_contract_syntax_and_structure PASSED     [ 10%]
-tests/test_agentpatent.py::test_case_struct_attributes PASSED            [ 20%]
-tests/test_agentpatent.py::test_semantic_consensus_rule PASSED           [ 30%]
-tests/test_agentpatent.py::test_native_transfer_calls PASSED             [ 40%]
-tests/test_agentpatent.py::test_patent_invalidated_flow PASSED           [ 50%]
-tests/test_agentpatent.py::test_patent_upheld_valid_flow PASSED          [ 60%]
-tests/test_agentpatent.py::test_dispute_and_admin_arbitration_flow PASSED [ 70%]
-tests/test_agentpatent.py::test_broken_prior_art_url_dismissal PASSED    [ 80%]
-tests/test_agentpatent.py::test_canary_token_failure_escalates PASSED    [ 90%]
-tests/test_agentpatent.py::test_reclaim_expired_patent_boundaries PASSED [100%]
+tests/test_agentpatent.py::test_contract_syntax_and_structure PASSED     [  7%]
+tests/test_agentpatent.py::test_case_struct_attributes PASSED            [ 14%]
+tests/test_agentpatent.py::test_semantic_consensus_rule PASSED           [ 21%]
+tests/test_agentpatent.py::test_native_transfer_calls PASSED             [ 28%]
+tests/test_agentpatent.py::test_patent_invalidated_flow PASSED           [ 35%]
+tests/test_agentpatent.py::test_patent_upheld_valid_flow PASSED          [ 42%]
+tests/test_agentpatent.py::test_autonomous_appeal_and_jury_arbitration_flow PASSED [ 50%]
+tests/test_agentpatent.py::test_broken_prior_art_url_dismissal PASSED    [ 57%]
+tests/test_agentpatent.py::test_canary_token_failure_escalates PASSED    [ 64%]
+tests/test_agentpatent.py::test_reclaim_expired_patent_boundaries PASSED [ 71%]
+tests/test_agentpatent.py::test_tripartite_multi_perspective_consensus PASSED [ 78%]
+tests/test_agentpatent.py::test_autonomous_circuit_breaker_trip_and_recovery PASSED [ 85%]
+tests/test_agentpatent.py::test_security_telemetry_endpoint PASSED       [ 92%]
+tests/test_real_genvm_flow.py::test_full_genvm_lifecycle PASSED          [100%]
 
-============================= 10 passed in 0.08s ==============================
+============================= 14 passed in 0.33s ==============================
 ```
 
 ---

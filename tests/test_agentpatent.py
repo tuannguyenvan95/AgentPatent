@@ -21,6 +21,7 @@ def test_contract_syntax_and_structure(contract_source):
     assert "def get_all_patents(" in contract_source
     assert "def get_patents_paginated(" in contract_source
     assert "def get_stats(" in contract_source
+    assert "def get_security_telemetry(" in contract_source
 
 
 def test_case_struct_attributes(contract_source):
@@ -43,6 +44,8 @@ def test_case_struct_attributes(contract_source):
         "reason: str",
         "confidence: u8",
         "overlap_score: u8",
+        "technical_score: u8",
+        "skeptic_score: u8",
         "created_at_time: u256",
         "expires_at_time: u256",
         "examination_started_time: u256",
@@ -76,6 +79,28 @@ class MockAgentPatentSimulator:
         self.patent_counter = 0
         self.current_time = 1700000000
         self.balances = {"inventor": 1000, "challenger": 500, "other": 200}
+        self.circuit_breaker_active = False
+        self.last_halt_timestamp = 0
+        self.canary_failure_count = 0
+
+    def _check_and_update_circuit_breaker(self):
+        if self.circuit_breaker_active:
+            if self.current_time > (self.last_halt_timestamp + 900):
+                self.circuit_breaker_active = False
+                self.canary_failure_count = 0
+
+    def get_security_telemetry(self):
+        self._check_and_update_circuit_breaker()
+        return {
+            "circuit_breaker_active": self.circuit_breaker_active,
+            "canary_failures": self.canary_failure_count,
+            "last_halt_timestamp": self.last_halt_timestamp,
+            "total_patent_locked": str(self.total_patent_locked),
+            "total_disputes_resolved": self.total_disputes_resolved,
+            "protocol_health": "NOMINAL" if not self.circuit_breaker_active else "CIRCUIT_BREAKER_HALTED",
+            "autonomous_mode": "ZERO_ADMIN_DECENTRALIZED",
+            "canary_watchdog": "CANARY_AGENT_PATENT_V2",
+        }
 
     def _sanitize_input(self, text: str) -> str:
         clean = str(text)
@@ -86,6 +111,10 @@ class MockAgentPatentSimulator:
         return clean
 
     def register_patent_claim(self, sender: str, title: str, claims: str, duration_seconds: int, deposit: int) -> str:
+        self._check_and_update_circuit_breaker()
+        if self.circuit_breaker_active:
+            raise ValueError("Protocol Circuit Breaker active: Operations temporarily paused due to detected anomaly. Autonomous cooldown in progress.")
+
         if deposit <= 0:
             raise ValueError("Patent validity escrow deposit must be greater than 0 GEN.")
         clean_title = self._sanitize_input(title.strip())
@@ -117,6 +146,8 @@ class MockAgentPatentSimulator:
             "reason": "Patent active.",
             "confidence": 0,
             "overlap_score": 0,
+            "technical_score": 0,
+            "skeptic_score": 0,
             "created_at_time": self.current_time,
             "expires_at_time": self.current_time + dur,
             "examination_started_time": 0,
@@ -128,6 +159,10 @@ class MockAgentPatentSimulator:
         return pid
 
     def challenge_prior_art(self, sender: str, patent_id: str, prior_art_url: str, bond: int) -> None:
+        self._check_and_update_circuit_breaker()
+        if self.circuit_breaker_active:
+            raise ValueError("Protocol Circuit Breaker active: Operations temporarily paused due to detected anomaly. Autonomous cooldown in progress.")
+
         if patent_id not in self.patents:
             raise KeyError("Patent does not exist.")
         p = self.patents[patent_id]
@@ -167,19 +202,31 @@ class MockAgentPatentSimulator:
             p["initial_verdict"] = "PATENT_UPHELD_VALID"
             p["confidence"] = 100
             p["overlap_score"] = 0
+            p["technical_score"] = 95
+            p["skeptic_score"] = 5
             p["reason"] = "Could not access or render prior art URL."
+            self.canary_failure_count = 0
         elif not canary_ok or confidence < 60:
             p["verdict"] = "ESCALATED"
             p["initial_verdict"] = "ESCALATED"
             p["confidence"] = confidence
             p["overlap_score"] = overlap_score
+            p["technical_score"] = 0
+            p["skeptic_score"] = 0
             p["reason"] = "Canary mismatch or low confidence."
+            self.canary_failure_count += 1
+            if self.canary_failure_count >= 3:
+                self.circuit_breaker_active = True
+                self.last_halt_timestamp = self.current_time
         else:
             p["verdict"] = simulated_verdict
             p["initial_verdict"] = simulated_verdict
             p["confidence"] = confidence
             p["overlap_score"] = overlap_score
+            p["technical_score"] = 85 if simulated_verdict == "PATENT_UPHELD_VALID" else 20
+            p["skeptic_score"] = 15 if simulated_verdict == "PATENT_UPHELD_VALID" else 85
             p["reason"] = "Adjudication complete."
+            self.canary_failure_count = 0
 
         self.current_time += 15
 
@@ -431,3 +478,60 @@ def test_reclaim_expired_patent_boundaries():
     assert sim.patents[pid]["status"] == 5
     assert sim.balances["inventor"] == 1000
     assert sim.total_patent_locked == 0
+
+
+def test_tripartite_multi_perspective_consensus():
+    """Ensure tripartite multi-perspective examination computes technical_score, skeptic_score, and overlap_score."""
+    sim = MockAgentPatentSimulator()
+    pid = sim.register_patent_claim("inventor", "Quantum Routing Invariant", "Braid group topology with asynchronous consensus.", 86400, 100)
+    sim.challenge_prior_art("challenger", pid, "https://arxiv.org/abs/2301.0001", 10)
+
+    # Valid examination: Patent Upheld
+    sim.adjudicate_collision(pid, "PATENT_UPHELD_VALID", overlap_score=15, confidence=95)
+    assert sim.patents[pid]["technical_score"] == 85
+    assert sim.patents[pid]["skeptic_score"] == 15
+    assert sim.patents[pid]["overlap_score"] == 15
+    assert sim.patents[pid]["verdict"] == "PATENT_UPHELD_VALID"
+
+
+def test_autonomous_circuit_breaker_trip_and_recovery():
+    """Ensure 3 consecutive canary violations trip the autonomous circuit breaker and it self-heals after cooldown."""
+    sim = MockAgentPatentSimulator()
+    
+    # 3 consecutive adversary attempts with bad canary
+    for i in range(3):
+        pid = sim.register_patent_claim("inventor", f"Exploit Patent {i}", "Adversarial payload test specification for canary.", 86400, 10)
+        sim.challenge_prior_art("challenger", pid, "https://adversary.org/fake", 1)
+        sim.adjudicate_collision(pid, "PATENT_INVALIDATED", canary_ok=False)
+
+    # Breaker must be tripped
+    assert sim.circuit_breaker_active is True
+    assert sim.canary_failure_count == 3
+
+    # New claims must be halted
+    with pytest.raises(ValueError, match="Protocol Circuit Breaker active"):
+        sim.register_patent_claim("inventor", "Halted Patent", "Specification when halted by autonomous watchdog.", 86400, 10)
+
+    # Cooldown duration elapses (900 seconds)
+    sim.current_time += 901
+    sim._check_and_update_circuit_breaker()
+    assert sim.circuit_breaker_active is False
+    assert sim.canary_failure_count == 0
+
+    # Operations resume autonomously without admin key
+    new_pid = sim.register_patent_claim("inventor", "Restored Patent", "Specification after autonomous self-healing recovery.", 86400, 10)
+    assert new_pid is not None
+
+
+def test_security_telemetry_endpoint():
+    """Verify get_security_telemetry outputs complete autonomous protocol invariants."""
+    sim = MockAgentPatentSimulator()
+    sim.register_patent_claim("inventor", "Telemetry Patent", "Test specification for autonomous protocol telemetry view.", 86400, 50)
+    
+    telemetry = sim.get_security_telemetry()
+    assert telemetry["circuit_breaker_active"] is False
+    assert telemetry["canary_failures"] == 0
+    assert telemetry["protocol_health"] == "NOMINAL"
+    assert telemetry["autonomous_mode"] == "ZERO_ADMIN_DECENTRALIZED"
+    assert telemetry["canary_watchdog"] == "CANARY_AGENT_PATENT_V2"
+

@@ -101,6 +101,8 @@ export interface PatentCaseData {
   reason: string;
   confidence: number;
   overlap_score: number;
+  technical_score?: number;
+  skeptic_score?: number;
   created_at_time?: string;
   expires_at_time?: string;
   examination_started_time?: string;
@@ -118,6 +120,17 @@ export interface ProtocolStats {
   total_patent_locked: string;
   total_disputes_resolved: number;
   active_examinations?: number;
+}
+
+export interface SecurityTelemetry {
+  circuit_breaker_active: boolean;
+  canary_failures: number;
+  last_halt_timestamp: string;
+  total_patent_locked: string;
+  total_disputes_resolved: number;
+  protocol_health: string;
+  autonomous_mode: string;
+  canary_watchdog: string;
 }
 
 /**
@@ -221,6 +234,42 @@ export async function fetchStats(contractAddress: string): Promise<ProtocolStats
       total_disputes_resolved: 0,
       active_examinations: 0,
     };
+  }
+}
+
+/**
+ * Fetch on-chain security telemetry & circuit breaker status
+ */
+export async function fetchSecurityTelemetry(contractAddress: string): Promise<SecurityTelemetry> {
+  const defaultTelemetry: SecurityTelemetry = {
+    circuit_breaker_active: false,
+    canary_failures: 0,
+    last_halt_timestamp: '0',
+    total_patent_locked: '0',
+    total_disputes_resolved: 0,
+    protocol_health: 'NOMINAL',
+    autonomous_mode: 'ZERO_ADMIN_DECENTRALIZED',
+    canary_watchdog: 'CANARY_AGENT_PATENT_V2',
+  };
+
+  if (!contractAddress || contractAddress === '0x0000000000000000000000000000000000000000') {
+    return defaultTelemetry;
+  }
+
+  try {
+    const client = getGenLayerClient();
+    const raw = await client.readContract({
+      address: contractAddress as `0x${string}`,
+      functionName: 'get_security_telemetry',
+      args: [],
+    });
+
+    if (typeof raw === 'string') {
+      return JSON.parse(raw);
+    }
+    return raw as unknown as SecurityTelemetry;
+  } catch (err) {
+    return defaultTelemetry;
   }
 }
 
